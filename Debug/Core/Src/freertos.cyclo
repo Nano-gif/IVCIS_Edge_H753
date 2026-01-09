@@ -1,0 +1,4 @@
+../Core/Src/freertos.c:96:6:MX_FREERTOS_Init	1
+../Core/Src/freertos.c:144:6:StartCameraTask	1
+../Core/Src/freertos.c:163:6:StartAITask	1
+../Core/Src/freertos.c:181:6:StartNetTask	2

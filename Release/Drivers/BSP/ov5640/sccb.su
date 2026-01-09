@@ -1,0 +1,8 @@
+../Drivers/BSP/ov5640/sccb.c:7:13:SCCB_Delay	8	static
+../Drivers/BSP/ov5640/sccb.c:25:13:SCCB_SDA_OUT	32	static
+../Drivers/BSP/ov5640/sccb.c:36:6:SCCB_Init	8	static
+../Drivers/BSP/ov5640/sccb.c:45:6:SCCB_Start	8	static
+../Drivers/BSP/ov5640/sccb.c:56:6:SCCB_Stop	8	static
+../Drivers/BSP/ov5640/sccb.c:67:6:SCCB_No_Ack	8	static
+../Drivers/BSP/ov5640/sccb.c:78:6:SCCB_WriteByte	16	static
+../Drivers/BSP/ov5640/sccb.c:95:9:SCCB_ReadByte	40	static

@@ -1,0 +1,6 @@
+../APP/src/Vision_Pipeline.c:33:6:HAL_JPEG_GetDataCallback	40	static,ignoring_inline_asm
+../APP/src/Vision_Pipeline.c:47:6:HAL_JPEG_DataReadyCallback	24	static
+../APP/src/Vision_Pipeline.c:58:6:HAL_JPEG_EncodeCpltCallback	16	static
+../APP/src/Vision_Pipeline.c:68:6:Vision_DMA_HalfTransfer_Callback	32	static,ignoring_inline_asm
+../APP/src/Vision_Pipeline.c:74:6:Vision_DMA_FullTransfer_Callback	64	static,ignoring_inline_asm
+../APP/src/Vision_Pipeline.c:102:8:Vision_Init	16	static

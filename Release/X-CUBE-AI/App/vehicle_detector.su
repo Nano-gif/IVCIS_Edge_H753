@@ -1,0 +1,11 @@
+../X-CUBE-AI/App/vehicle_detector.c:6464:9:ai_vehicle_detector_get_info	152	static
+../X-CUBE-AI/App/vehicle_detector.c:6511:9:ai_vehicle_detector_get_report	152	static
+../X-CUBE-AI/App/vehicle_detector.c:6558:10:ai_vehicle_detector_get_error	0	static
+../X-CUBE-AI/App/vehicle_detector.c:6565:10:ai_vehicle_detector_create	16	static
+../X-CUBE-AI/App/vehicle_detector.c:6611:12:ai_vehicle_detector_inputs_get	0	static
+../X-CUBE-AI/App/vehicle_detector.c:6622:12:ai_vehicle_detector_outputs_get	0	static
+../X-CUBE-AI/App/vehicle_detector.c:6633:11:ai_vehicle_detector_destroy	0	static
+../X-CUBE-AI/App/vehicle_detector.c:6640:9:ai_vehicle_detector_init	24	static
+../X-CUBE-AI/App/vehicle_detector.c:6576:10:ai_vehicle_detector_create_and_init	88	static
+../X-CUBE-AI/App/vehicle_detector.c:6657:8:ai_vehicle_detector_run	0	static
+../X-CUBE-AI/App/vehicle_detector.c:6665:8:ai_vehicle_detector_forward	0	static
