@@ -52,7 +52,7 @@
 /*----- Default value in ETH configuration GUI in CubeMx: 1524 -----*/
 #define ETH_RX_BUFFER_SIZE 1536
 /*----- Default Value for MEM_LIBC_MALLOC: 0 ---*/
-#define MEM_LIBC_MALLOC 1
+#define MEM_LIBC_MALLOC 0 /* 必须为 0，否则使用系统 malloc (D1 域)，ETH DMA 无法访问 */
 /*----- Value in opt.h for MEM_ALIGNMENT: 1 -----*/
 #define MEM_ALIGNMENT 4
 /*----- Default Value for MEM_SIZE: 1600 ---*/

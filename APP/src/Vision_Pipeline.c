@@ -21,7 +21,7 @@ static uint16_t jpeg_strips_fed = 0;   // 已喂入 JPEG 核心的条带数
 static uint32_t jpeg_total_out_size = 0; // 当前帧压缩后的总大小
 
 D2_SRAM_SECTION IVCIS_ALIGN_32 uint8_t DCMI_Strip_Buf[2][STRIP_BUFFER_SIZE];
-D1_AXI_SECTION IVCIS_ALIGN_32 uint8_t JPEG_Out_Buf[JPEG_OUT_BUFFER_SIZE];
+D2_SRAM_SECTION IVCIS_ALIGN_32 uint8_t JPEG_Out_Buf[JPEG_OUT_BUFFER_SIZE]; // 改为 D2 以便 ETH DMA 访问
 
 /* ========================================== */
 /* 2. JPEG 异步回调逻辑 (实现全帧流式压缩)      */

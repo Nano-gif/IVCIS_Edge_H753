@@ -93,13 +93,13 @@ void NMI_Handler(void)
 void HardFault_Handler(void)
 {
   /* USER CODE BEGIN HardFault_IRQn 0 */
-
-  /* USER CODE END HardFault_IRQn 0 */
+  /* 硬件错误指示：快速闪烁 LED */
   while (1)
   {
-    /* USER CODE BEGIN W1_HardFault_IRQn 0 */
-    /* USER CODE END W1_HardFault_IRQn 0 */
+    HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin); // 黄色 LED 快闪
+    for (volatile uint32_t i = 0; i < 500000; i++);
   }
+  /* USER CODE END HardFault_IRQn 0 */
 }
 
 /**

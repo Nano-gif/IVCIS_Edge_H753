@@ -189,7 +189,17 @@ void StartNetTask(void *argument)
 	    /* 检查 JPEG 编码完成标志 (由中断回调设置) */
 	    if (jpeg_encode_complete) {
 	      jpeg_encode_complete = 0;
-	      Net_Client_SendImage(JPEG_Out_Buf, last_jpeg_actual_size, full_transfer_count);
+	      
+	      /* [DEBUG] 只发送第一帧验证端到端链路 */
+	      static uint8_t first_frame_sent = 0;
+	      if (!first_frame_sent) {
+	        first_frame_sent = 1;
+	        printf("[SINGLE_FRAME] Sending first frame...\r\n");
+	        Net_Client_SendImage(JPEG_Out_Buf, last_jpeg_actual_size, full_transfer_count);
+	        printf("[SINGLE_FRAME] Done. Check Python receiver.\r\n");
+	      } else {
+	        printf("[DCMI_TEST] Frame %ld ready (not sent)\r\n", full_transfer_count);
+	      }
 	    }
 	    osDelay(10);
 	  }

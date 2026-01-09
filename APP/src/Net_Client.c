@@ -75,7 +75,7 @@ void Net_Client_Diagnostic(void) {
 }
 
 void Net_Client_SendImage(uint8_t *pData, uint32_t len, uint32_t frame_id) {
-    printf("[NET] SendImage called: state=%d, len=%ld\r\n", (int)g_net_ctrl.state, len);
+    printf("[NET] SendImage: pData=0x%lX, len=%ld\r\n", (uint32_t)pData, len);
     if (g_net_ctrl.state != NET_READY || pData == NULL || len == 0) {
         printf("[NET] SKIP: state not ready or invalid params\r\n");
         return;
@@ -106,6 +106,11 @@ void Net_Client_SendImage(uint8_t *pData, uint32_t len, uint32_t frame_id) {
                 sent_fail++;
             }
             pbuf_free(ptr_pbuf);
+            
+            /* 每发送 10 个包后让出 CPU，防止总线饥饿导致 DCMI 卡死 */
+            if (sent_ok % 10 == 0) {
+                osDelay(1);
+            }
         } else {
             sent_fail++;
             break;
