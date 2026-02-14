@@ -1,0 +1,125 @@
+telegram-archiver/
+├── .env.example                    # 环境变量模板 (必须包含 REAL_MODE=True/False, TEST_WHITELIST_CHAT_ID)
+├── .gitignore
+├── .dockerignore
+├── docker-compose.yml              # 定义 App 和 Postgres-PGroonga 服务
+├── pyproject.toml                  # uv 依赖定义 (sqlalchemy, telethon, loguru, asyncpg, pydantic-settings)
+├── uv.lock                         # uv 锁定文件
+├── Dockerfile                      # 生产环境构建文件
+├── README.md
+│
+├── app/                            # 应用源码
+│   ├── __init__.py
+│   ├── main.py                     # [入口] 程序启动，初始化 DB，启动 Bot 和 UserBot 客户端
+│   │   └── func: main() -> void
+│   │
+│   ├── config.py                   # [配置] Pydantic Settings
+│   │   └── class: Settings
+│   │       ├── func: get_db_url()
+│   │       └── func: validate_prod_safety_settings() # 确保在测试模式下配置了白名单 ID
+│   │
+│   ├── logger.py                   # [日志] 集中化日志配置 (Loguru)
+│   │   └── func: setup_logger(level: str, log_file: str) -> void
+│   │       # 拦截 logging 标准库，统一路由到 Loguru，配置 Rotation 策略
+│   │
+│   ├── bot/                        # [界面层] Telegram Bot 交互逻辑
+│   │   ├── __init__.py
+│   │   ├── loader.py               # Bot 实例加载
+│   │   │   └── func: create_bot_client() -> TelegramClient
+│   │   │
+│   │   ├── middlewares.py          # 权限与安全拦截
+│   │   │   └── class: AuthMiddleware
+│   │   │       └── func: check_admin_permission(user_id) -> bool
+│   │   │
+│   │   └── handlers/               # 命令处理器
+│   │       ├── __init__.py
+│   │       ├── auth.py             # /login, /logout
+│   │       │   └── class: AuthHandler
+│   │       │       ├── func: handle_login_request(event)
+│   │       │       ├── func: handle_2fa_password(event)
+│   │       │       └── func: handle_verification_code(event)
+│   │       ├── download.py         # /download
+│   │       │   └── class: DownloadHandler
+│   │       │       ├── func: list_dialogs(event)
+│   │       │       └── func: start_download_task(event)
+│   │       └── search.py           # /search
+│   │           └── class: SearchHandler
+│   │               ├── func: execute_search(event)
+│   │               └── func: render_result_buttons(results) # 生成跳转链接按钮
+│   │
+│   ├── core/                       # [核心层] 业务逻辑 (UserBot 行为)
+│   │   ├── __init__.py
+│   │   ├── session_manager.py      # 管理 UserBot 的 Session 生命周期
+│   │   │   └── class: UserSessionManager
+│   │   │       ├── func: is_authorized() -> bool
+│   │   │       ├── func: sign_in(phone, code, password)
+│   │   │       └── func: keep_alive() # 定期心跳检测
+│   │   │
+│   │   ├── downloader.py           # 核心下载逻辑
+│   │   │   └── class: HistoryDownloader
+│   │   │       ├── func: sync_chat_history(chat_id, limit, offset_date)
+│   │   │       ├── func: _process_message_batch(messages) # 批量入库
+│   │   │       └── func: _handle_incremental_update(latest_msg_id)
+│   │   │
+│   │   ├── search_engine.py        # 搜索业务封装
+│   │   │   └── class: SearchEngine
+│   │   │       └── func: search_full_text(query, chat_id, time_range) -> List[Message]
+│   │   │
+│   │   └── safety.py               # [安全守卫] 防风控与限流
+│   │       ├── class: FloodWaitHandler
+│   │       │   └── func: run_with_retry(coroutine) # 捕获 FloodWaitError 并自动休眠
+│   │       └── class: GlobalRateLimiter
+│   │           └── func: acquire_permission() # 强制全局 API 调用间隔
+│   │
+│   └── database/                   # [数据层]
+│       ├── __init__.py
+│       ├── engine.py               # AsyncPG 引擎配置
+│       │   └── func: get_db_session() -> AsyncGenerator
+│       │
+│       ├── models.py               # SQLAlchemy 表定义
+│       │   ├── class: User(Base)   # 本地存储的用户配置
+│       │   ├── class: Chat(Base)   # 会话元数据
+│       │   └── class: Message(Base)
+│       │       # 定义 PGroonga 索引: Index("ix_msg_content", "content", postgresql_using="pgroonga")
+│       │
+│       └── repositories.py         # CRUD 操作
+│           ├── class: MessageRepo
+│           │   ├── func: upsert_batch(messages: List[dict])
+│           │   └── func: search_by_pgroonga(query: str)
+│           └── class: ChatRepo
+│               └── func: update_chat_meta(chat_id, title, type)
+│
+├── tests/                          # [真实环境测试] 严禁 Mock，必须通过真实 API 交互
+│   ├── __init__.py
+│   ├── conftest.py                 # Pytest 配置
+│   │   ├── func: real_db_session() # 连接真实(或独立的测试用) PGroonga 数据库
+│   │   ├── func: authorized_user_bot() # 复用本地 session 文件，避免重复登录
+│   │   └── func: prod_safety_check() # [Fixture] 自动运行前检查：目标是否为测试白名单群组？
+│   │
+│   ├── utils/
+│   │   ├── __init__.py
+│   │   └── prod_guard.py           # 生产环境测试护栏
+│   │       └── class: ProdTestGuard
+│   │           ├── func: ensure_target_is_whitelisted(chat_id) # 若 ID 不匹配 .env 配置，抛出 FatalError
+│   │           └── func: generate_test_marker_text() # 生成唯一 hash 字符串，用于后续清理测试数据
+│   │
+│   ├── e2e_scenarios/              # 真实场景测试
+│   │   ├── __init__.py
+│   │   ├── test_01_connectivity.py
+│   │   │   └── func: test_bot_can_see_user_bot() # 互发 Ping
+│   │   │
+│   │   ├── test_02_download_cycle.py
+│   │   │   └── class: TestRealDownload
+│   │   │       ├── func: test_seeding_data() # UserBot 向白名单群发 10 条特定消息
+│   │   │       ├── func: test_trigger_download_command() # UserBot 发送 /download 指令
+│   │   │       └── func: test_verify_db_records() # 查询 DB 确认 10 条消息已入库
+│   │   │
+│   │   └── test_03_search_engine.py
+│   │       └── class: TestPGroongaSearch
+│   │           └── func: test_chinese_segmentation_search() # 搜索 "测试" 是否能搜到 "这是一个测试消息"
+│   │
+│   └── cleanup.py                  # 测试后清理脚本 (只删白名单群的 DB 数据)
+│
+└── scripts/
+    ├── init_db.sql                 # 启用 pgroonga 扩展的 SQL
+    └── entrypoint.sh               # 容器启动脚本

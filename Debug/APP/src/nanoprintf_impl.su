@@ -1,0 +1,12 @@
+E:/STM32/OV/APP/Inc/nanoprintf.h:337:12:npf_parse_format_spec	24	static
+E:/STM32/OV/APP/Inc/nanoprintf.h:500:25:npf_utoa_rev	32	static
+E:/STM32/OV/APP/Inc/nanoprintf.h:570:12:npf_ftoa_rev	184	static
+E:/STM32/OV/APP/Inc/nanoprintf.h:762:13:npf_bufputc	24	static
+E:/STM32/OV/APP/Inc/nanoprintf.h:767:13:npf_bufputc_nop	16	static
+E:/STM32/OV/APP/Inc/nanoprintf.h:775:13:npf_putc_cnt	24	static
+E:/STM32/OV/APP/Inc/nanoprintf.h:789:5:npf_vpprintf	192	static
+E:/STM32/OV/APP/Inc/nanoprintf.h:1132:5:npf_pprintf	24	static
+E:/STM32/OV/APP/Inc/nanoprintf.h:1143:5:npf_snprintf	24	static
+E:/STM32/OV/APP/Inc/nanoprintf.h:1154:5:npf_vsnprintf	56	static
+../APP/src/nanoprintf_impl.c:28:13:uart_putc	16	static
+../APP/src/nanoprintf_impl.c:39:6:dbg_printf	16	static

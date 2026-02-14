@@ -1,20 +1,20 @@
 /* USER CODE BEGIN Header */
 /**
-  ******************************************************************************
-  * @file    stm32h7xx_it.c
-  * @brief   Interrupt Service Routines.
-  ******************************************************************************
-  * @attention
-  *
-  * Copyright (c) 2025 STMicroelectronics.
-  * All rights reserved.
-  *
-  * This software is licensed under terms that can be found in the LICENSE file
-  * in the root directory of this software component.
-  * If no LICENSE file comes with this software, it is provided AS-IS.
-  *
-  ******************************************************************************
-  */
+ ******************************************************************************
+ * @file    stm32h7xx_it.c
+ * @brief   Interrupt Service Routines.
+ ******************************************************************************
+ * @attention
+ *
+ * Copyright (c) 2025 STMicroelectronics.
+ * All rights reserved.
+ *
+ * This software is licensed under terms that can be found in the LICENSE file
+ * in the root directory of this software component.
+ * If no LICENSE file comes with this software, it is provided AS-IS.
+ *
+ ******************************************************************************
+ */
 /* USER CODE END Header */
 
 /* Includes ------------------------------------------------------------------*/
@@ -59,9 +59,6 @@ extern ETH_HandleTypeDef heth;
 extern DMA_HandleTypeDef hdma_dcmi;
 extern DCMI_HandleTypeDef hdcmi;
 extern DMA2D_HandleTypeDef hdma2d;
-extern MDMA_HandleTypeDef hmdma_jpeg_infifo_nf;
-extern MDMA_HandleTypeDef hmdma_jpeg_outfifo_ne;
-extern JPEG_HandleTypeDef hjpeg;
 extern UART_HandleTypeDef huart3;
 extern TIM_HandleTypeDef htim6;
 
@@ -81,8 +78,7 @@ void NMI_Handler(void)
 
   /* USER CODE END NonMaskableInt_IRQn 0 */
   /* USER CODE BEGIN NonMaskableInt_IRQn 1 */
-   while (1)
-  {
+  while (1) {
   }
   /* USER CODE END NonMaskableInt_IRQn 1 */
 }
@@ -93,13 +89,33 @@ void NMI_Handler(void)
 void HardFault_Handler(void)
 {
   /* USER CODE BEGIN HardFault_IRQn 0 */
-  /* 硬件错误指示：快速闪烁 LED */
-  while (1)
-  {
-    HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin); // 黄色 LED 快闪
-    for (volatile uint32_t i = 0; i < 500000; i++);
+  /* 直接写 UART3 寄存器输出 Hard Fault 信号 (不依赖 HAL) */
+  USART3->TDR = 'H';
+  while (!(USART3->ISR & USART_ISR_TXE_TXFNF))
+    ;
+  USART3->TDR = 'F';
+  while (!(USART3->ISR & USART_ISR_TXE_TXFNF))
+    ;
+  USART3->TDR = '!';
+  while (!(USART3->ISR & USART_ISR_TXE_TXFNF))
+    ;
+  USART3->TDR = '\r';
+  while (!(USART3->ISR & USART_ISR_TXE_TXFNF))
+    ;
+  USART3->TDR = '\n';
+
+  while (1) {
+    /* 持续发送 'X' 作为 Hard Fault 存活信号 */
+    for (volatile uint32_t i = 0; i < 2000000; i++)
+      ;
+    USART3->TDR = 'X';
   }
   /* USER CODE END HardFault_IRQn 0 */
+  while (1)
+  {
+    /* USER CODE BEGIN W1_HardFault_IRQn 0 */
+    /* USER CODE END W1_HardFault_IRQn 0 */
+  }
 }
 
 /**
@@ -252,20 +268,6 @@ void DMA2D_IRQHandler(void)
 }
 
 /**
-  * @brief This function handles JPEG global interrupt.
-  */
-void JPEG_IRQHandler(void)
-{
-  /* USER CODE BEGIN JPEG_IRQn 0 */
-
-  /* USER CODE END JPEG_IRQn 0 */
-  HAL_JPEG_IRQHandler(&hjpeg);
-  /* USER CODE BEGIN JPEG_IRQn 1 */
-
-  /* USER CODE END JPEG_IRQn 1 */
-}
-
-/**
   * @brief This function handles MDMA global interrupt.
   */
 void MDMA_IRQHandler(void)
@@ -273,8 +275,6 @@ void MDMA_IRQHandler(void)
   /* USER CODE BEGIN MDMA_IRQn 0 */
 
   /* USER CODE END MDMA_IRQn 0 */
-  HAL_MDMA_IRQHandler(&hmdma_jpeg_infifo_nf);
-  HAL_MDMA_IRQHandler(&hmdma_jpeg_outfifo_ne);
   /* USER CODE BEGIN MDMA_IRQn 1 */
 
   /* USER CODE END MDMA_IRQn 1 */

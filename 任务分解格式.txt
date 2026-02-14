@@ -1,0 +1,38 @@
+- [ ] Task 14 - E2E 场景：下载指令交互（tests/e2e_scenarios/test_02_download_flow.py）
+
+  **目标**
+
+  在真实 Telegram 环境中验证：
+
+  - Bot 能够响应 `/download` 命令并列出当前真实的对话列表
+  - Bot 能够处理 Inline Button 的点击事件（CallbackQuery）
+  - 用户选择对话后，Bot 能正确反馈并触发下载流程
+
+  **文件范围**
+
+  - `tests/e2e_scenarios/test_02_download_flow.py`
+  - `tests/conftest.py`（如有需新增针对下载流程的 fixture）
+
+  **TDD 步骤**
+
+  1. 在 `tests/e2e_scenarios/test_02_download_flow.py` 中编写测试：
+    - 前提：`.env` 配置完成，且测试账号中至少存在 1 个活跃对话。
+    - 测试步骤：
+      - 启动 Bot（后台运行）。
+      - 使用 UserBot 向 Bot 发送 `/download`。
+      - 等待并验证 Bot 回复了一条包含 Inline Buttons（对话列表）的消息。
+      - UserBot 模拟点击第一个对话的按钮（触发 Callback）。
+      - 等待并验证 Bot 编辑消息或发送新消息，提示“开始下载”或“任务已创建”。
+  2. 运行测试（预期失败，如果没有实现完整逻辑）。
+  3. 调整 `app/bot/handlers/download.py` 中的逻辑，确保真实环境下的 `iter_dialogs` 调用和 Callback 处理与测试预期一致，直到测试通过。
+
+  **需要参考的文档**
+
+  - Telethon `Message.click()` 文档（用于 UserBot 模拟点击）：
+    - `https://docs.telethon.dev/en/stable/modules/custom.html#telethon.tl.custom.message.Message.click`
+
+  **可复用函数 / 模块**
+
+  - `HistoryDownloader`（真实调用）
+  - 之前实现的 `test_01_connectivity.py` 中的 Bot 启动逻辑
+  ---

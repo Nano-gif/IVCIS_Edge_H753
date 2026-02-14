@@ -1,6 +1,10 @@
-../APP/src/Vision_Pipeline.c:33:6:HAL_JPEG_GetDataCallback	40	static,ignoring_inline_asm
-../APP/src/Vision_Pipeline.c:47:6:HAL_JPEG_DataReadyCallback	24	static
-../APP/src/Vision_Pipeline.c:58:6:HAL_JPEG_EncodeCpltCallback	16	static
-../APP/src/Vision_Pipeline.c:68:6:Vision_DMA_HalfTransfer_Callback	32	static,ignoring_inline_asm
-../APP/src/Vision_Pipeline.c:74:6:Vision_DMA_FullTransfer_Callback	64	static,ignoring_inline_asm
-../APP/src/Vision_Pipeline.c:102:8:Vision_Init	16	static
+../APP/src/Vision_Pipeline.c:32:13:force_stop	4	static
+../APP/src/Vision_Pipeline.c:45:13:extract_gray	16	static
+../APP/src/Vision_Pipeline.c:57:16:scan_jpeg	24	static
+../APP/src/Vision_Pipeline.c:84:16:capture_one	24	static
+../APP/src/Vision_Pipeline.c:107:8:Vision_Init	8	static
+../APP/src/Vision_Pipeline.c:121:6:Vision_SetMode	16	static
+../APP/src/Vision_Pipeline.c:136:6:Vision_CaptureStart	8	static
+../APP/src/Vision_Pipeline.c:155:9:Vision_IsFrameReady	4	static
+../APP/src/Vision_Pipeline.c:157:10:Vision_GetFrameBuffer	4	static
+../APP/src/Vision_Pipeline.c:159:10:Vision_GetFrameSize	4	static

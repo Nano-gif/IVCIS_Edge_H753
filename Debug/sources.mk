@@ -23,6 +23,7 @@ OBJCOPY_BIN :=
 
 # Every subdirectory with source files must be described here
 SUBDIRS := \
+APP/Test \
 APP/src \
 Core/Src \
 Core/Startup \
@@ -43,6 +44,5 @@ Middlewares/Third_Party/LwIP/src/core/ipv6 \
 Middlewares/Third_Party/LwIP/src/netif \
 Middlewares/Third_Party/LwIP/src/netif/ppp \
 Middlewares/Third_Party/LwIP/system/OS \
-Utilities/JPEG \
 X-CUBE-AI/App \
 

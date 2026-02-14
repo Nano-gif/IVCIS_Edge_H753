@@ -1,0 +1,6 @@
+../APP/Test/test_vision_init.c:16:13:assert_true	2
+../APP/Test/test_vision_init.c:26:13:test_init_returns_zero	1
+../APP/Test/test_vision_init.c:31:13:test_frame_not_ready_before_capture	1
+../APP/Test/test_vision_init.c:35:13:test_jpeg_frame_capture	4
+../APP/Test/test_vision_init.c:54:13:xcam_streaming_loop	2
+../APP/Test/test_vision_init.c:65:6:Test_Vision_Init_Run	1

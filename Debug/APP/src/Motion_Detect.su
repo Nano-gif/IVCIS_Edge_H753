@@ -1,0 +1,3 @@
+../APP/src/Motion_Detect.c:20:6:Motion_Init	16	static
+../APP/src/Motion_Detect.c:28:6:Motion_Detect	32	static
+../APP/src/Motion_Detect.c:68:10:Motion_GetDiff	4	static

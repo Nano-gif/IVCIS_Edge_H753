@@ -10,7 +10,6 @@ RM := rm -rf
 # All of the sources participating in the build are defined here
 -include sources.mk
 -include X-CUBE-AI/App/subdir.mk
--include Utilities/JPEG/subdir.mk
 -include Middlewares/Third_Party/LwIP/system/OS/subdir.mk
 -include Middlewares/Third_Party/LwIP/src/netif/ppp/subdir.mk
 -include Middlewares/Third_Party/LwIP/src/netif/subdir.mk
@@ -31,6 +30,7 @@ RM := rm -rf
 -include Core/Startup/subdir.mk
 -include Core/Src/subdir.mk
 -include APP/src/subdir.mk
+-include APP/Test/subdir.mk
 -include objects.mk
 
 ifneq ($(MAKECMDGOALS),clean)

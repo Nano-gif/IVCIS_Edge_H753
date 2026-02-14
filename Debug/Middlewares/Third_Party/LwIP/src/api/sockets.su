@@ -10,7 +10,7 @@
 ../Middlewares/Third_Party/LwIP/src/api/sockets.c:548:1:free_socket_locked	24	static
 ../Middlewares/Third_Party/LwIP/src/api/sockets.c:572:1:free_socket_free_elements	24	static
 ../Middlewares/Third_Party/LwIP/src/api/sockets.c:594:1:free_socket	32	static
-../Middlewares/Third_Party/LwIP/src/api/sockets.c:620:1:lwip_accept	112	static
+../Middlewares/Third_Party/LwIP/src/api/sockets.c:620:1:lwip_accept	104	static
 ../Middlewares/Third_Party/LwIP/src/api/sockets.c:718:1:lwip_bind	48	static
 ../Middlewares/Third_Party/LwIP/src/api/sockets.c:772:1:lwip_close	32	static
 ../Middlewares/Third_Party/LwIP/src/api/sockets.c:813:1:lwip_connect	56	static
@@ -32,12 +32,12 @@
 ../Middlewares/Third_Party/LwIP/src/api/sockets.c:1752:1:lwip_writev	56	static
 ../Middlewares/Third_Party/LwIP/src/api/sockets.c:1771:1:lwip_link_select_cb	16	static
 ../Middlewares/Third_Party/LwIP/src/api/sockets.c:1795:1:lwip_unlink_select_cb	16	static
-../Middlewares/Third_Party/LwIP/src/api/sockets.c:1835:1:lwip_selscan	104	static
+../Middlewares/Third_Party/LwIP/src/api/sockets.c:1835:1:lwip_selscan	96	static
 ../Middlewares/Third_Party/LwIP/src/api/sockets.c:1964:1:lwip_select	136	static
-../Middlewares/Third_Party/LwIP/src/api/sockets.c:2193:1:lwip_pollscan	56	static
+../Middlewares/Third_Party/LwIP/src/api/sockets.c:2193:1:lwip_pollscan	48	static
 ../Middlewares/Third_Party/LwIP/src/api/sockets.c:2319:1:lwip_poll	72	static
 ../Middlewares/Third_Party/LwIP/src/api/sockets.c:2438:1:lwip_poll_should_wake	32	static
-../Middlewares/Third_Party/LwIP/src/api/sockets.c:2477:1:event_callback	48	static
+../Middlewares/Third_Party/LwIP/src/api/sockets.c:2477:1:event_callback	40	static
 ../Middlewares/Third_Party/LwIP/src/api/sockets.c:2576:13:select_check_waiters	40	static
 ../Middlewares/Third_Party/LwIP/src/api/sockets.c:2655:1:lwip_shutdown	48	static
 ../Middlewares/Third_Party/LwIP/src/api/sockets.c:2700:1:lwip_getaddrname	72	static

@@ -38,8 +38,8 @@ ENTRY(Reset_Handler)
 _estack = ORIGIN(DTCMRAM) + LENGTH(DTCMRAM);    /* end of RAM */
 
 /* Generate a link error if heap and stack don't fit into RAM */
-_Min_Heap_Size = 0x800 ;      /* required amount of heap  */
-_Min_Stack_Size = 0x800 ;     /* required amount of stack */
+_Min_Heap_Size = 0x800;      /* required amount of heap  */
+_Min_Stack_Size = 0x800;     /* required amount of stack */
 
 /* Specify the memory areas */
 MEMORY
@@ -159,17 +159,17 @@ SECTIONS
     . = ALIGN(8);
   } >DTCMRAM
 
-  /* D2 域：以太网/DCMI 专属，严格禁止 CPU 随机变量进入 */
-  .lwip_sec (NOLOAD) :
+  /* D2 域：DCMI JPEG 缓冲 + 以太网 */
+  .RamDataSection (NOLOAD) :
   {
-    . = ABSOLUTE(0x30000000);
     . = ALIGN(32);
-    KEEP(*(.RxDecripSection))
-    KEEP(*(.TxDecripSection))
-    KEEP(*(.Rx_PoolSection))
-    KEEP(*(.RamDataSection))
-    . = ALIGN(32);
+    *(.RamDataSection)
+    *(.RamDataSection*)
   } >RAM_D2
+
+  .RxDecripSection (NOLOAD) : { . = ABSOLUTE(0x30040000); KEEP(*(.RxDecripSection*)) } >RAM_D2
+  .TxDecripSection (NOLOAD) : { . = ABSOLUTE(0x30040060); KEEP(*(.TxDecripSection*)) } >RAM_D2
+  .Rx_PoolSection  (NOLOAD) : { . = ABSOLUTE(0x30040200); KEEP(*(.Rx_PoolSection*)) } >RAM_D2
 
   /* JPEG/AI 专用缓冲区 */
   .axi_sram_sec (NOLOAD) :

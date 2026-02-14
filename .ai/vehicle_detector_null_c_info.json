@@ -22656,44 +22656,44 @@
   ],
   "environment": {
     "generated_model": {
-      "generated_time": "2026-01-10T04:11:13+0800",
+      "generated_time": "2026-02-14T06:44:19+0800",
       "model_files": [
         {
           "name": "vehicle_detector_data_params.h",
-          "signature": "0x65ab9b2e54461b1ce4b7524daf29cac9"
+          "signature": "0xa856c4c6c010932e265949d694690910"
         },
         {
           "name": "vehicle_detector_data_params.c",
-          "signature": "0x775589f0b372f75f50b53b682741e451"
+          "signature": "0x8ab403d603c7147bb5b7a735b33e89e8"
         },
         {
           "name": "vehicle_detector_data.h",
-          "signature": "0x3e9b3ff71c2291a1cae411ef00bfff53"
+          "signature": "0xbb8af6f5186694ff0676c083fc2b78ec"
         },
         {
           "name": "vehicle_detector_data.c",
-          "signature": "0xc4c08d74bd3a368a90e1ce8751235ae4"
+          "signature": "0xee89ee1ba915af6ed72620aa4d046e6e"
         },
         {
           "name": "vehicle_detector_config.h",
-          "signature": "0x69925499206a700724a56261b0891b2f"
+          "signature": "0x92fab177b4989ee36245c2aeb428d022"
         },
         {
           "name": "vehicle_detector.h",
-          "signature": "0xa7d7bcf3428a6d7600cd3cb9a5b06fcd"
+          "signature": "0xa3c2e1e0842c7221c787f0e13e287648"
         },
         {
           "name": "vehicle_detector.c",
-          "signature": "0x24a18fe46008cb9379665c6bef3d0eaa"
+          "signature": "0x9e956f0d4d1b9bc32fe46563ee6b91e8"
         }
       ],
       "name": "vehicle_detector"
     },
-    "network_signature": "0x318d82a9f6bc7463",
+    "network_signature": "0x05a094f187c03b7f",
     "test_name": "",
     "tools": [
       {
-        "arguments": "generate --target stm32h7 --name vehicle_detector -m E:/uint8-float_mobilenetV2-0.35_acc0.972.tflite --compression none --verbosity 1 --workspace C:/Users/ADMINI~1/AppData/Local/Temp/mxAI_workspace54399437629249916378626106271992298 --output C:/Users/administor/.stm32cubemx/vehicle_detector_output",
+        "arguments": "generate --target stm32h7 --name vehicle_detector -m E:/uint8-float_mobilenetV2-0.35_acc0.972.tflite --compression none --verbosity 1 --workspace C:/Users/ADMINI~1/AppData/Local/Temp/mxAI_workspace1589994248011005221815681838849819 --output C:/Users/administor/.stm32cubemx/vehicle_detector_output",
         "environment": [
           "STATS_TYPE=X-CUBE-AI"
         ],

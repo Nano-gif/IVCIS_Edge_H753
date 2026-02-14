@@ -1,16 +1,32 @@
 #ifndef VISION_PIPELINE_H
 #define VISION_PIPELINE_H
 
+#include "shared_types.h"
 #include <stdint.h>
-#include "app_config.h"
 
+/**
+ * (VisionMode_t defined in shared_types.h)
+ */
+
+/** Initialize OV5640 camera + DCMI, default JPEG mode. */
 int8_t Vision_Init(void);
 
-extern uint32_t half_transfer_count;
-extern uint32_t full_transfer_count;
-extern uint32_t last_jpeg_actual_size;
-extern uint8_t  DCMI_Strip_Buf[2][STRIP_BUFFER_SIZE];
-extern uint8_t  JPEG_Out_Buf[JPEG_OUT_BUFFER_SIZE];
-extern volatile uint8_t jpeg_encode_complete;
+/** Switch between JPEG and Gray modes. */
+void Vision_SetMode(VisionMode_t mode);
 
-#endif
+/** Start a single-frame DCMI+DMA capture (synchronous). */
+void Vision_CaptureStart(void);
+
+/** Check if a complete frame has been received. */
+uint8_t Vision_IsFrameReady(void);
+
+/** Get pointer to the completed frame buffer (NULL if not ready). */
+uint8_t *Vision_GetFrameBuffer(void);
+
+/** Get the actual byte count of the completed frame (0 if not ready). */
+uint32_t Vision_GetFrameSize(void);
+
+/** Send current JPEG frame over UART for XCAM viewer. */
+void Vision_SendFrameUART(void);
+
+#endif /* VISION_PIPELINE_H */

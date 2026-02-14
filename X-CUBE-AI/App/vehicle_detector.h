@@ -2,7 +2,7 @@
   ******************************************************************************
   * @file    vehicle_detector.h
   * @author  AST Embedded Analytics Research Platform
-  * @date    2026-01-10T04:11:13+0800
+  * @date    2026-02-14T06:44:19+0800
   * @brief   AI Tool Automatic Code Generator for Embedded NN computing
   ******************************************************************************
   * @attention
