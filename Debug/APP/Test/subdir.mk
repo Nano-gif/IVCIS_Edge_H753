@@ -7,6 +7,7 @@
 C_SRCS += \
 ../APP/Test/test_mode_switch.c \
 ../APP/Test/test_motion_detect.c \
+../APP/Test/test_net_client.c \
 ../APP/Test/test_net_diag.c \
 ../APP/Test/test_power_manager.c \
 ../APP/Test/test_vision_init.c 
@@ -14,6 +15,7 @@ C_SRCS += \
 OBJS += \
 ./APP/Test/test_mode_switch.o \
 ./APP/Test/test_motion_detect.o \
+./APP/Test/test_net_client.o \
 ./APP/Test/test_net_diag.o \
 ./APP/Test/test_power_manager.o \
 ./APP/Test/test_vision_init.o 
@@ -21,6 +23,7 @@ OBJS += \
 C_DEPS += \
 ./APP/Test/test_mode_switch.d \
 ./APP/Test/test_motion_detect.d \
+./APP/Test/test_net_client.d \
 ./APP/Test/test_net_diag.d \
 ./APP/Test/test_power_manager.d \
 ./APP/Test/test_vision_init.d 
@@ -33,7 +36,7 @@ APP/Test/%.o APP/Test/%.su APP/Test/%.cyclo: ../APP/Test/%.c APP/Test/subdir.mk
 clean: clean-APP-2f-Test
 
 clean-APP-2f-Test:
-	-$(RM) ./APP/Test/test_mode_switch.cyclo ./APP/Test/test_mode_switch.d ./APP/Test/test_mode_switch.o ./APP/Test/test_mode_switch.su ./APP/Test/test_motion_detect.cyclo ./APP/Test/test_motion_detect.d ./APP/Test/test_motion_detect.o ./APP/Test/test_motion_detect.su ./APP/Test/test_net_diag.cyclo ./APP/Test/test_net_diag.d ./APP/Test/test_net_diag.o ./APP/Test/test_net_diag.su ./APP/Test/test_power_manager.cyclo ./APP/Test/test_power_manager.d ./APP/Test/test_power_manager.o ./APP/Test/test_power_manager.su ./APP/Test/test_vision_init.cyclo ./APP/Test/test_vision_init.d ./APP/Test/test_vision_init.o ./APP/Test/test_vision_init.su
+	-$(RM) ./APP/Test/test_mode_switch.cyclo ./APP/Test/test_mode_switch.d ./APP/Test/test_mode_switch.o ./APP/Test/test_mode_switch.su ./APP/Test/test_motion_detect.cyclo ./APP/Test/test_motion_detect.d ./APP/Test/test_motion_detect.o ./APP/Test/test_motion_detect.su ./APP/Test/test_net_client.cyclo ./APP/Test/test_net_client.d ./APP/Test/test_net_client.o ./APP/Test/test_net_client.su ./APP/Test/test_net_diag.cyclo ./APP/Test/test_net_diag.d ./APP/Test/test_net_diag.o ./APP/Test/test_net_diag.su ./APP/Test/test_power_manager.cyclo ./APP/Test/test_power_manager.d ./APP/Test/test_power_manager.o ./APP/Test/test_power_manager.su ./APP/Test/test_vision_init.cyclo ./APP/Test/test_vision_init.d ./APP/Test/test_vision_init.o ./APP/Test/test_vision_init.su
 
 .PHONY: clean-APP-2f-Test
 

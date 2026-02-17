@@ -1,6 +1,6 @@
 /**
  * @file    Net_Client.c
- * @brief   UDP client with IVCIS chunk headers (zero-copy)
+ * @brief   UDP 核心传输与接收 (零拷贝 + IVCIS 协议)
  */
 
 #include "Net_Client.h"
@@ -8,154 +8,128 @@
 #include "cmsis_os.h"
 #include "debug_config.h"
 #include "lwip/etharp.h"
-#include "lwip/netif.h"
 #include "lwip/pbuf.h"
 #include "lwip/udp.h"
 #include "stm32h7xx_hal.h"
+#include <string.h>
 
-/* P4: private control block */
 typedef struct {
   struct udp_pcb *upcb;
   ip_addr_t dest_addr;
   NetState_t state;
-  uint32_t tx_frame_count;
+  uint32_t tx_cnt;
+  IVCIS_Command_t last_cmd;
+  volatile bool new_cmd;
 } NetCtrl_t;
 
 static NetCtrl_t s_net = {0};
 
-/* P5: read-only diagnostic (extern ETH handle) */
-extern ETH_HandleTypeDef heth;
+/* --- 私有: UDP 接收回调 --- */
 
-/* ---- Public API ---- */
+static void
+net_recv_cb(void *arg, struct udp_pcb *pcb, struct pbuf *p,
+            const ip_addr_t *addr,
+            uint16_t port /* Raw 模式仅分配数据 pbuf, 不使用包头链 */) {
+  (void)arg;
+  (void)pcb;
+  (void)addr;
+  (void)port;
+  if (!p)
+    return;
+  /* 至少 8 字节包头 (Magic + Type + Reserved) */
+  if (p->tot_len >= 8U) {
+    IVCIS_Command_t *cmd = (IVCIS_Command_t *)p->payload;
+    if (cmd->magic == IVCR_MAGIC) {
+      uint32_t cpy_len = (p->tot_len > sizeof(IVCIS_Command_t))
+                             ? sizeof(IVCIS_Command_t)
+                             : p->tot_len;
+      memset(&s_net.last_cmd, 0, sizeof(IVCIS_Command_t));
+      memcpy(&s_net.last_cmd, cmd, cpy_len);
+      s_net.new_cmd = true;
+      DBG_NET("Cmd RECV: type=0x%02X len=%u", cmd->cmd_type,
+              (uint32_t)p->tot_len);
+    }
+  }
+  pbuf_free(p);
+}
+
+/* --- 公共 API: 生命周期 --- */
 
 int8_t Net_Client_Init(void) {
+  if (s_net.upcb)
+    udp_remove(s_net.upcb);
   s_net.upcb = udp_new();
-  if (s_net.upcb == NULL) {
+  if (!s_net.upcb) {
     s_net.state = NET_ERROR;
-    DBG_NET("UDP PCB alloc FAIL");
     return -1;
   }
 
   IP4_ADDR(&s_net.dest_addr, DEST_IP_ADDR0, DEST_IP_ADDR1, DEST_IP_ADDR2,
            DEST_IP_ADDR3);
-
-  /* P6: check udp_bind return */
-  err_t bind_err = udp_bind(s_net.upcb, IP_ADDR_ANY, UDP_LOCAL_PORT);
-  if (bind_err != ERR_OK) {
-    DBG_ERROR("[Net] udp_bind fail: %d", (int)bind_err);
+  if (udp_bind(s_net.upcb, IP_ADDR_ANY, UDP_LOCAL_PORT) != ERR_OK) {
     udp_remove(s_net.upcb);
     s_net.upcb = NULL;
     s_net.state = NET_ERROR;
     return -1;
   }
-
-  /* Pre-resolve destination MAC via ARP */
-  struct netif *nif = netif_default;
-  if (nif != NULL) {
-    etharp_request(nif, &s_net.dest_addr);
-  }
-
+  udp_recv(s_net.upcb, net_recv_cb, NULL);
   s_net.state = NET_READY;
-  DBG_NET("Init OK, port=%d -> %d.%d.%d.%d:%d", UDP_LOCAL_PORT, DEST_IP_ADDR0,
-          DEST_IP_ADDR1, DEST_IP_ADDR2, DEST_IP_ADDR3, UDP_REMOTE_PORT);
   return 0;
 }
 
+/* --- 公共 API: 传输 --- */
+
 void Net_Client_SendImage(uint8_t *pData, uint32_t len, uint32_t frame_id) {
-  if ((s_net.state != NET_READY) || (pData == NULL) || (len == 0U)) {
+  if ((s_net.state != NET_READY) || !pData || !len)
     return;
+  /* 仅当 pData 不在非缓存 D2/D3 SRAM 区域时执行 D-Cache 清洗 */
+  if ((uint32_t)pData < 0x30000000U) {
+    SCB_CleanDCache_by_Addr((uint32_t *)((uint32_t)pData & ~31U),
+                            (int32_t)(len + 31U));
   }
 
-  /* P3: ensure DCache coherency before DMA access */
-  SCB_CleanDCache_by_Addr((uint32_t *)((uint32_t)pData & ~31U),
-                          (int32_t)(len + 31U));
-
-  /* P1: compute chunk count */
-  uint32_t payload_cap = NET_MAX_UDP_PAYLOAD - (uint32_t)sizeof(NetChunkHdr_t);
-  uint16_t chunk_cnt = (uint16_t)((len + payload_cap - 1U) / payload_cap);
-
-  uint32_t offset = 0U;
-  uint32_t fail_streak = 0U;
+  /* Raw 模式: 满载有效载荷 */
+  uint32_t cap = NET_MAX_UDP_PAYLOAD;
+  uint16_t total = (uint16_t)((len + cap - 1U) / cap);
+  uint32_t off = 0U, streak = 0U;
   s_net.state = NET_SENDING;
 
-  for (uint16_t ci = 0U; ci < chunk_cnt; ci++) {
-    uint32_t chunk_len = len - offset;
-    if (chunk_len > payload_cap) {
-      chunk_len = payload_cap;
-    }
-
-    /* Allocate header pbuf (RAM) */
-    struct pbuf *hdr_p =
-        pbuf_alloc(PBUF_TRANSPORT, (uint16_t)sizeof(NetChunkHdr_t), PBUF_RAM);
-    if (hdr_p == NULL) {
-      fail_streak++;
+  for (uint16_t i = 0U; i < total; i++) {
+    uint32_t clen = ((len - off) > cap) ? cap : (len - off);
+    struct pbuf *d = pbuf_alloc(PBUF_RAW, (uint16_t)clen, PBUF_ROM);
+    if (!d) {
+      streak = 3;
       break;
     }
 
-    /* P1: fill IVCIS chunk header */
-    NetChunkHdr_t *hdr = (NetChunkHdr_t *)hdr_p->payload;
-    hdr->magic = IVCIS_MAGIC;
-    hdr->frame_id = frame_id;
-    hdr->chunk_idx = ci;
-    hdr->chunk_cnt = chunk_cnt;
-    hdr->total_size = len;
-    hdr->flags = 0U;
-    hdr->reserved[0] = 0U;
-    hdr->reserved[1] = 0U;
-    hdr->reserved[2] = 0U;
-
-    /* Data pbuf (ROM — zero-copy) */
-    struct pbuf *dat_p = pbuf_alloc(PBUF_RAW, (uint16_t)chunk_len, PBUF_ROM);
-    if (dat_p == NULL) {
-      pbuf_free(hdr_p);
-      fail_streak++;
-      break;
-    }
-    dat_p->payload = (void *)(pData + offset);
-
-    pbuf_chain(hdr_p, dat_p);
-
-    err_t err =
-        udp_sendto(s_net.upcb, hdr_p, &s_net.dest_addr, UDP_REMOTE_PORT);
-    pbuf_free(hdr_p);
-
-    if (err == ERR_OK) {
-      offset += chunk_len;
-      fail_streak = 0U;
+    d->payload = (void *)(pData + off);
+    if (udp_sendto(s_net.upcb, d, &s_net.dest_addr, UDP_REMOTE_PORT) ==
+        ERR_OK) {
+      off += clen;
+      streak = 0;
     } else {
-      fail_streak++;
+      streak++;
     }
-
-    /* P2: drop frame after 3 consecutive failures */
-    if (fail_streak >= 3U) {
-      DBG_WARN("[Net] Frame #%lu dropped (3 fails)", frame_id);
+    pbuf_free(d);
+    if (streak >= 3U)
       break;
-    }
 
-    /* Yield every 10 chunks to avoid bus starvation */
-    if (((ci + 1U) % 10U) == 0U) {
-      osDelay(1);
-    }
+    osDelay(1);
   }
-
-  s_net.tx_frame_count++;
+  s_net.tx_cnt++;
   s_net.state = NET_READY;
-  DBG_NET("F#%lu: %lu/%luB sent (%lu chunks)", frame_id, offset, len,
-          (uint32_t)chunk_cnt);
+  DBG_NET("Sent %lu bytes (%u chunks)", len, total);
 }
 
-void Net_Client_Diagnostic(void) {
-  /* P5: read-only reporting, no register writes */
-  DBG_NET("=== HW Diag ===");
-  DBG_NET("ETH state:0x%lX  TX_desc[0]:0x%lX  RX_desc[0]:0x%lX",
-          (uint32_t)heth.gState, heth.TxDescList.TxDesc[0],
-          heth.RxDescList.RxDesc[0]);
-  DBG_NET("Frames sent: %lu", s_net.tx_frame_count);
+/* --- Public API: Reception --- */
 
-  if (heth.TxDescList.TxDesc[0] < 0x30000000U) {
-    DBG_ERROR("[Net] TX desc NOT in D2 SRAM!");
-  }
+bool Net_Client_RecvCommand(IVCIS_Command_t *cmd) {
+  if (!s_net.new_cmd || !cmd)
+    return false;
+  memcpy(cmd, &s_net.last_cmd, sizeof(IVCIS_Command_t));
+  s_net.new_cmd = false;
+  return true;
 }
 
 NetState_t Net_Client_GetState(void) { return s_net.state; }
-uint32_t Net_Client_GetTxCount(void) { return s_net.tx_frame_count; }
+uint32_t Net_Client_GetTxCount(void) { return s_net.tx_cnt; }

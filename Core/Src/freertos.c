@@ -16,6 +16,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "Motion_Detect.h"
+#include "Net_Client.h"
 #include "Power_Manager.h"
 #include "Vision_Pipeline.h"
 #include "app_config.h"
@@ -31,6 +32,8 @@
 #include "test_power_manager.h"
 #elif (TEST_SELECT == 4)
 #include "test_net_diag.h"
+#elif (TEST_SELECT == 5)
+#include "test_net_client.h"
 #endif
 /* USER CODE END Includes */
 
@@ -145,6 +148,9 @@ void StartCameraTask(void *argument) {
 #elif (TEST_SELECT == 4)
   Test_Net_Diag_Run();
   vTaskSuspend(NULL);
+#elif (TEST_SELECT == 5)
+  Test_Net_Client_Run();
+  vTaskSuspend(NULL);
 #else
   if (Vision_Init() != 0) {
     DBG_ERROR("[Camera] Vision_Init FAIL");
@@ -156,6 +162,7 @@ void StartCameraTask(void *argument) {
   PowerMgr_Init();
 
   PowerMode_t prev = PWR_FULL;
+  uint32_t frame_id = 0;
   DBG_INFO("[Camera] PowerMgr started");
 
   for (;;) {
@@ -172,7 +179,7 @@ void StartCameraTask(void *argument) {
     } else {
       if (Vision_IsFrameReady()) {
         jpeg_sz = Vision_GetFrameSize();
-        Vision_SendFrameUART();
+        Net_Client_SendImage(Vision_GetFrameBuffer(), jpeg_sz, frame_id++);
       }
     }
 
@@ -204,10 +211,17 @@ void StartCameraTask(void *argument) {
 void StartNetTask(void *argument) {
   /* USER CODE BEGIN StartNetTask */
   (void)argument;
-  DBG_INFO("[Net] LwIP OK");
+  Net_Client_Init();
 
+  IVCIS_Command_t cmd;
   for (;;) {
-    /* TODO: JPEG -> UDP */
+    if (Net_Client_RecvCommand(&cmd)) {
+      if (cmd.cmd_type == CMD_TYPE_VIOLATION) {
+        DBG_INFO("[Net] VIOLATION: %s", cmd.payload.violation.plate);
+      } else if (cmd.cmd_type == CMD_TYPE_SERVO) {
+        DBG_INFO("[Net] SERVO: %u deg", cmd.payload.servo.angle_deg);
+      }
+    }
     osDelay(10);
   }
   /* USER CODE END StartNetTask */

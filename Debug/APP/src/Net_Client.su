@@ -1,3 +1,6 @@
-../APP/src/Net_Client.c:20:8:Net_Client_Init	24	static
-../APP/src/Net_Client.c:47:6:Net_Client_Diagnostic	40	static
-../APP/src/Net_Client.c:83:6:Net_Client_SendImage	56	static
+../APP/src/Net_Client.c:29:13:net_recv_cb	32	static
+../APP/src/Net_Client.c:56:8:Net_Client_Init	8	static
+../APP/src/Net_Client.c:80:6:Net_Client_SendImage	72	static,ignoring_inline_asm
+../APP/src/Net_Client.c:125:6:Net_Client_RecvCommand	24	static
+../APP/src/Net_Client.c:133:12:Net_Client_GetState	4	static
+../APP/src/Net_Client.c:134:10:Net_Client_GetTxCount	4	static

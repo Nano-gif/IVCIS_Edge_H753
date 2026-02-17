@@ -49,7 +49,7 @@ static uint8_t scan_jpeg(void) {
   return 0;
 }
 
-/* ===== Public API ===== */
+/* ===== 公共 API ===== */
 
 int8_t Vision_Init(void) {
   if (atk_mc5640_init() != ATK_MC5640_EOK) {
@@ -85,8 +85,8 @@ void Vision_SetMode(VisionMode_t mode) {
 
   osDelay(300);
 
-  /* GRAY: discard 2 dirty frames (ISP latency)
-   * JPEG: skip — scan_jpeg() validates integrity */
+  /* GRAY: 丢弃前 2 帧脏数据 (ISP 等待)
+   * JPEG: 跳过 — scan_jpeg() 已包含完整性校验 */
   if (mode != VISION_MODE_JPEG) {
     uint32_t wl = GRAY_FRAME_SIZE * 2 / 4U;
     for (uint8_t d = 0; d < 2; d++) {

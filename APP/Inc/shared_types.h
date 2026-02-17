@@ -24,28 +24,37 @@ typedef struct {
   uint8_t *p_data;   /* 指向 JPEG/Gray 缓冲区 (D2 SRAM) */
 } FrameDesc_t;
 
-/* UDP 分片包头 (每个 UDP 包都携带, 支持乱序重组) */
+/* UDP 分片包头 (备用，Raw 模式下不使用) */
 typedef struct __attribute__((packed)) {
   uint32_t magic; /* 0x49564349 ("IVCI") */
   uint32_t frame_id;
-  uint16_t chunk_idx;  /* fragment index (0-based) */
-  uint16_t chunk_cnt;  /* total fragment count */
-  uint32_t total_size; /* total JPEG size in bytes */
-  uint8_t flags;       /* bit0: low_quality, bit1: alarm_active */
+  uint16_t chunk_idx;  /* 分片索引 (0 开始) */
+  uint16_t chunk_cnt;  /* 总分片数 */
+  uint32_t total_size; /* 总 JPEG 大小 (字节) */
+  uint8_t flags;       /* bit0: 低质量, bit1: 报警触发 */
   uint8_t reserved[3];
-} NetChunkHdr_t; /* 20 bytes */
+} NetChunkHdr_t; /* 20 字节 */
 
-#define IVCIS_MAGIC 0x49564349U /* "IVCI" */
+#define IVCI_MAGIC 0x49564349U /* MCU -> Cloud ("IVCI") */
+#define IVCR_MAGIC 0x49564352U /* Cloud -> MCU ("IVCR") */
 
 /* 云端指令类型 */
 typedef enum { CMD_TYPE_VIOLATION = 0x01, CMD_TYPE_SERVO = 0x02 } CmdType_t;
 
-/* 云端指令载荷 */
-typedef struct {
-  uint32_t frame_id;      /* 对应帧序号 */
-  uint16_t angle;         /* 舵机目标角度 (0~180) */
-  uint8_t cmd_type;       /* CmdType_t */
-  uint8_t violation_flag; /* 1=检测到违章 */
+/* 云端指令结构体 (Architecture §7.2) */
+typedef struct __attribute__((packed)) {
+  uint32_t magic;   /* IVCR_MAGIC */
+  uint8_t cmd_type; /* CmdType_t */
+  uint8_t reserved[3];
+  union {
+    struct {
+      uint8_t is_violation;
+      char plate[16];
+    } violation;
+    struct {
+      uint16_t angle_deg;
+    } servo;
+  } payload;
 } IVCIS_Command_t;
 
 #endif /* SHARED_TYPES_H */

@@ -7,6 +7,7 @@
 C_SRCS += \
 ../APP/src/Motion_Detect.c \
 ../APP/src/Net_Client.c \
+../APP/src/Net_Client_Util.c \
 ../APP/src/Power_Manager.c \
 ../APP/src/Vision_Pipeline.c \
 ../APP/src/nanoprintf_impl.c \
@@ -17,6 +18,7 @@ C_SRCS += \
 OBJS += \
 ./APP/src/Motion_Detect.o \
 ./APP/src/Net_Client.o \
+./APP/src/Net_Client_Util.o \
 ./APP/src/Power_Manager.o \
 ./APP/src/Vision_Pipeline.o \
 ./APP/src/nanoprintf_impl.o \
@@ -27,6 +29,7 @@ OBJS += \
 C_DEPS += \
 ./APP/src/Motion_Detect.d \
 ./APP/src/Net_Client.d \
+./APP/src/Net_Client_Util.d \
 ./APP/src/Power_Manager.d \
 ./APP/src/Vision_Pipeline.d \
 ./APP/src/nanoprintf_impl.d \
@@ -42,7 +45,7 @@ APP/src/%.o APP/src/%.su APP/src/%.cyclo: ../APP/src/%.c APP/src/subdir.mk
 clean: clean-APP-2f-src
 
 clean-APP-2f-src:
-	-$(RM) ./APP/src/Motion_Detect.cyclo ./APP/src/Motion_Detect.d ./APP/src/Motion_Detect.o ./APP/src/Motion_Detect.su ./APP/src/Net_Client.cyclo ./APP/src/Net_Client.d ./APP/src/Net_Client.o ./APP/src/Net_Client.su ./APP/src/Power_Manager.cyclo ./APP/src/Power_Manager.d ./APP/src/Power_Manager.o ./APP/src/Power_Manager.su ./APP/src/Vision_Pipeline.cyclo ./APP/src/Vision_Pipeline.d ./APP/src/Vision_Pipeline.o ./APP/src/Vision_Pipeline.su ./APP/src/nanoprintf_impl.cyclo ./APP/src/nanoprintf_impl.d ./APP/src/nanoprintf_impl.o ./APP/src/nanoprintf_impl.su ./APP/src/test_motion_detect.cyclo ./APP/src/test_motion_detect.d ./APP/src/test_motion_detect.o ./APP/src/test_motion_detect.su ./APP/src/vision_capture.cyclo ./APP/src/vision_capture.d ./APP/src/vision_capture.o ./APP/src/vision_capture.su ./APP/src/vision_uart_tx.cyclo ./APP/src/vision_uart_tx.d ./APP/src/vision_uart_tx.o ./APP/src/vision_uart_tx.su
+	-$(RM) ./APP/src/Motion_Detect.cyclo ./APP/src/Motion_Detect.d ./APP/src/Motion_Detect.o ./APP/src/Motion_Detect.su ./APP/src/Net_Client.cyclo ./APP/src/Net_Client.d ./APP/src/Net_Client.o ./APP/src/Net_Client.su ./APP/src/Net_Client_Util.cyclo ./APP/src/Net_Client_Util.d ./APP/src/Net_Client_Util.o ./APP/src/Net_Client_Util.su ./APP/src/Power_Manager.cyclo ./APP/src/Power_Manager.d ./APP/src/Power_Manager.o ./APP/src/Power_Manager.su ./APP/src/Vision_Pipeline.cyclo ./APP/src/Vision_Pipeline.d ./APP/src/Vision_Pipeline.o ./APP/src/Vision_Pipeline.su ./APP/src/nanoprintf_impl.cyclo ./APP/src/nanoprintf_impl.d ./APP/src/nanoprintf_impl.o ./APP/src/nanoprintf_impl.su ./APP/src/test_motion_detect.cyclo ./APP/src/test_motion_detect.d ./APP/src/test_motion_detect.o ./APP/src/test_motion_detect.su ./APP/src/vision_capture.cyclo ./APP/src/vision_capture.d ./APP/src/vision_capture.o ./APP/src/vision_capture.su ./APP/src/vision_uart_tx.cyclo ./APP/src/vision_uart_tx.d ./APP/src/vision_uart_tx.o ./APP/src/vision_uart_tx.su
 
 .PHONY: clean-APP-2f-src
 

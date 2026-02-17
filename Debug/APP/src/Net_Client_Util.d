@@ -1,16 +1,7 @@
-Core/Src/freertos.o: ../Core/Src/freertos.c \
- ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h \
- ../Core/Inc/FreeRTOSConfig.h \
- ../Middlewares/Third_Party/FreeRTOS/Source/include/projdefs.h \
- ../Middlewares/Third_Party/FreeRTOS/Source/include/portable.h \
- ../Middlewares/Third_Party/FreeRTOS/Source/include/deprecated_definitions.h \
- ../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h \
- ../Middlewares/Third_Party/FreeRTOS/Source/include/mpu_wrappers.h \
- ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os.h \
- ../Middlewares/Third_Party/FreeRTOS/Source/include/task.h \
- ../Middlewares/Third_Party/FreeRTOS/Source/include/list.h \
- ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h \
- ../Core/Inc/main.h ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal.h \
+APP/src/Net_Client_Util.o: ../APP/src/Net_Client_Util.c \
+ E:/STM32/OV/APP/Inc/Net_Client.h E:/STM32/OV/APP/Inc/shared_types.h \
+ E:/STM32/OV/APP/Inc/app_config.h \
+ ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal.h \
  ../Core/Inc/stm32h7xx_hal_conf.h \
  ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_rcc.h \
  ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_def.h \
@@ -48,24 +39,10 @@ Core/Src/freertos.o: ../Core/Src/freertos.c \
  ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_tim_ex.h \
  ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_uart.h \
  ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_uart_ex.h \
- E:/STM32/OV/APP/Inc/Motion_Detect.h E:/STM32/OV/APP/Inc/Net_Client.h \
- E:/STM32/OV/APP/Inc/shared_types.h E:/STM32/OV/APP/Inc/Power_Manager.h \
- E:/STM32/OV/APP/Inc/Vision_Pipeline.h E:/STM32/OV/APP/Inc/app_config.h \
- E:/STM32/OV/APP/Inc/debug_config.h \
- E:/STM32/OV/Drivers/BSP/ov5640/ov5640.h \
- E:/STM32/OV/APP/Inc/shared_types.h
-../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h:
-../Core/Inc/FreeRTOSConfig.h:
-../Middlewares/Third_Party/FreeRTOS/Source/include/projdefs.h:
-../Middlewares/Third_Party/FreeRTOS/Source/include/portable.h:
-../Middlewares/Third_Party/FreeRTOS/Source/include/deprecated_definitions.h:
-../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h:
-../Middlewares/Third_Party/FreeRTOS/Source/include/mpu_wrappers.h:
-../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os.h:
-../Middlewares/Third_Party/FreeRTOS/Source/include/task.h:
-../Middlewares/Third_Party/FreeRTOS/Source/include/list.h:
-../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h:
-../Core/Inc/main.h:
+ E:/STM32/OV/APP/Inc/debug_config.h
+E:/STM32/OV/APP/Inc/Net_Client.h:
+E:/STM32/OV/APP/Inc/shared_types.h:
+E:/STM32/OV/APP/Inc/app_config.h:
 ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal.h:
 ../Core/Inc/stm32h7xx_hal_conf.h:
 ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_rcc.h:
@@ -104,12 +81,4 @@ Core/Src/freertos.o: ../Core/Src/freertos.c \
 ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_tim_ex.h:
 ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_uart.h:
 ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_uart_ex.h:
-E:/STM32/OV/APP/Inc/Motion_Detect.h:
-E:/STM32/OV/APP/Inc/Net_Client.h:
-E:/STM32/OV/APP/Inc/shared_types.h:
-E:/STM32/OV/APP/Inc/Power_Manager.h:
-E:/STM32/OV/APP/Inc/Vision_Pipeline.h:
-E:/STM32/OV/APP/Inc/app_config.h:
 E:/STM32/OV/APP/Inc/debug_config.h:
-E:/STM32/OV/Drivers/BSP/ov5640/ov5640.h:
-E:/STM32/OV/APP/Inc/shared_types.h:
