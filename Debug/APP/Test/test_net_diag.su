@@ -1,0 +1,3 @@
+../APP/Test/test_net_diag.c:24:20:link_str	16	static
+../APP/Test/test_net_diag.c:41:13:print_netif	40	static
+../APP/Test/test_net_diag.c:54:6:Test_Net_Diag_Run	40	static

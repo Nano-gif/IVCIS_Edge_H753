@@ -16,11 +16,22 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "Motion_Detect.h"
+#include "Power_Manager.h"
 #include "Vision_Pipeline.h"
 #include "app_config.h"
 #include "debug_config.h"
+#include "ov5640.h"
 #include "shared_types.h"
 
+#if (TEST_SELECT == 1)
+#include "test_mode_switch.h"
+#elif (TEST_SELECT == 2)
+#include "test_motion_detect.h"
+#elif (TEST_SELECT == 3)
+#include "test_power_manager.h"
+#elif (TEST_SELECT == 4)
+#include "test_net_diag.h"
+#endif
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -49,13 +60,6 @@ const osThreadAttr_t Task_Camera_attributes = {
     .stack_size = 2048 * 4,
     .priority = (osPriority_t)osPriorityHigh,
 };
-/* Definitions for Task_AI */
-osThreadId_t Task_AIHandle;
-const osThreadAttr_t Task_AI_attributes = {
-    .name = "Task_AI",
-    .stack_size = 4096 * 4,
-    .priority = (osPriority_t)osPriorityNormal,
-};
 /* Definitions for Task_Net */
 osThreadId_t Task_NetHandle;
 const osThreadAttr_t Task_Net_attributes = {
@@ -70,7 +74,6 @@ const osThreadAttr_t Task_Net_attributes = {
 /* USER CODE END FunctionPrototypes */
 
 void StartCameraTask(void *argument);
-void StartAITask(void *argument);
 void StartNetTask(void *argument);
 
 extern void MX_LWIP_Init(void);
@@ -107,15 +110,11 @@ void MX_FREERTOS_Init(void) {
   Task_CameraHandle =
       osThreadNew(StartCameraTask, NULL, &Task_Camera_attributes);
 
-  /* creation of Task_AI */
-  Task_AIHandle = osThreadNew(StartAITask, NULL, &Task_AI_attributes);
-
   /* creation of Task_Net */
   Task_NetHandle = osThreadNew(StartNetTask, NULL, &Task_Net_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
-  extern void Test_Net_Client_Run(void);
-  // Test_Net_Client_Run(); /* Uncomment to run TDD */
+  /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_EVENTS */
@@ -125,74 +124,90 @@ void MX_FREERTOS_Init(void) {
 
 /* USER CODE BEGIN Header_StartCameraTask */
 /**
- * @brief  Task_Camera: Vision capture + Motion detection
+ * @brief  Camera 任务: 三级功耗状态机驱动
  */
 /* USER CODE END Header_StartCameraTask */
 void StartCameraTask(void *argument) {
   /* init code for LWIP */
+  MX_LWIP_Init();
   /* USER CODE BEGIN StartCameraTask */
   (void)argument;
-  DBG_INFO("[Camera] Init...");
 
+#if (TEST_SELECT == 1)
+  Test_Mode_Switch_Run();
+  vTaskSuspend(NULL);
+#elif (TEST_SELECT == 2)
+  Test_Motion_Detect_Run();
+  vTaskSuspend(NULL);
+#elif (TEST_SELECT == 3)
+  Test_Power_Manager_Run();
+  vTaskSuspend(NULL);
+#elif (TEST_SELECT == 4)
+  Test_Net_Diag_Run();
+  vTaskSuspend(NULL);
+#else
   if (Vision_Init() != 0) {
-    DBG_ERROR("[Camera] Vision_Init FAILED, task suspended");
+    DBG_ERROR("[Camera] Vision_Init FAIL");
     vTaskSuspend(NULL);
   }
 
-  Vision_SetMode(VISION_MODE_GRAY);
-  Motion_Init(CAM_GRAY_WIDTH, CAM_GRAY_HEIGHT);
+  Vision_SetMode(VISION_MODE_JPEG);
+  OV5640_Apply_Best_Settings();
+  PowerMgr_Init();
 
-  /* Discard first 3 frames for sensor stabilization */
-  for (uint8_t w = 0; w < 3; w++) {
-    Vision_CaptureStart();
-  }
-  DBG_INFO("[Camera] Running: Gray 160x120 motion detect");
+  PowerMode_t prev = PWR_FULL;
+  DBG_INFO("[Camera] PowerMgr started");
 
   for (;;) {
     Vision_CaptureStart();
 
-    if (Vision_IsFrameReady()) {
-      uint8_t *frame = Vision_GetFrameBuffer();
-      bool motion = Motion_Detect(frame);
-      uint32_t diff = Motion_GetDiff();
+    PowerMode_t cur = PowerMgr_GetMode();
+    uint32_t jpeg_sz = 0;
+    bool gray_mot = false;
 
-      if (motion) {
-        DBG_INFO("[Camera] Motion! Diff=%lu", diff);
-        /* TODO: switch JPEG, capture, signal Net task */
+    if (cur == PWR_DETECT) {
+      if (Vision_IsFrameReady()) {
+        gray_mot = Motion_Detect(Vision_GetFrameBuffer());
+      }
+    } else {
+      if (Vision_IsFrameReady()) {
+        jpeg_sz = Vision_GetFrameSize();
+        Vision_SendFrameUART();
       }
     }
 
-    osDelay(100);
-  }
-  /* USER CODE END StartCameraTask */
-}
+    PowerMgr_Tick(jpeg_sz, gray_mot);
+    cur = PowerMgr_GetMode();
 
-/* USER CODE BEGIN Header_StartAITask */
-/**
- * @brief  Task_AI: Reserved stub (AI runs on cloud)
- */
-/* USER CODE END Header_StartAITask */
-void StartAITask(void *argument) {
-  /* USER CODE BEGIN StartAITask */
-  (void)argument;
-  /* AI inference runs on cloud, this task is a CubeMX stub */
-  vTaskSuspend(NULL);
-  /* USER CODE END StartAITask */
+    if (cur != prev) {
+      if (cur == PWR_DETECT) {
+        Vision_SetMode(VISION_MODE_GRAY);
+        Motion_Init(CAM_GRAY_WIDTH, CAM_GRAY_HEIGHT);
+      } else if (prev == PWR_DETECT) {
+        Vision_SetMode(VISION_MODE_JPEG);
+        OV5640_Apply_Best_Settings();
+      }
+      prev = cur;
+    }
+
+    osDelay(PowerMgr_GetDelay());
+  }
+#endif
+  /* USER CODE END StartCameraTask */
 }
 
 /* USER CODE BEGIN Header_StartNetTask */
 /**
- * @brief  Task_Net: LwIP protocol stack processing
+ * @brief  Net 任务: LwIP 协议栈处理
  */
 /* USER CODE END Header_StartNetTask */
 void StartNetTask(void *argument) {
   /* USER CODE BEGIN StartNetTask */
   (void)argument;
-  MX_LWIP_Init();
-  DBG_INFO("[Net] LwIP initialized");
+  DBG_INFO("[Net] LwIP OK");
 
   for (;;) {
-    /* TODO: check for JPEG frames to send via UDP */
+    /* TODO: JPEG -> UDP */
     osDelay(10);
   }
   /* USER CODE END StartNetTask */

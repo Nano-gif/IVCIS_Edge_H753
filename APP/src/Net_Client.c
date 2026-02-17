@@ -1,129 +1,161 @@
+/**
+ * @file    Net_Client.c
+ * @brief   UDP client with IVCIS chunk headers (zero-copy)
+ */
+
 #include "Net_Client.h"
 #include "app_config.h"
 #include "cmsis_os.h"
+#include "debug_config.h"
 #include "lwip/etharp.h"
 #include "lwip/netif.h"
 #include "lwip/pbuf.h"
 #include "lwip/udp.h"
-#include <stdio.h>
-#include <string.h>
+#include "stm32h7xx_hal.h"
 
+/* P4: private control block */
+typedef struct {
+  struct udp_pcb *upcb;
+  ip_addr_t dest_addr;
+  NetState_t state;
+  uint32_t tx_frame_count;
+} NetCtrl_t;
 
-/* 引用外部以太网句柄 */
+static NetCtrl_t s_net = {0};
+
+/* P5: read-only diagnostic (extern ETH handle) */
 extern ETH_HandleTypeDef heth;
 
-NetCtrl_t g_net_ctrl = {0};
+/* ---- Public API ---- */
 
 int8_t Net_Client_Init(void) {
-  g_net_ctrl.upcb = udp_new();
-  if (g_net_ctrl.upcb == NULL) {
-    g_net_ctrl.state = NET_ERROR;
+  s_net.upcb = udp_new();
+  if (s_net.upcb == NULL) {
+    s_net.state = NET_ERROR;
+    DBG_NET("UDP PCB alloc FAIL");
     return -1;
   }
-  IP4_ADDR(&g_net_ctrl.dest_addr, DEST_IP_ADDR0, DEST_IP_ADDR1, DEST_IP_ADDR2,
-           DEST_IP_ADDR3);
-  udp_bind(g_net_ctrl.upcb, IP_ADDR_ANY, UDP_LOCAL_PORT);
 
-  /* 强制发起 ARP 请求，确保知道目标 MAC */
-  struct netif *netif = netif_default;
-  if (netif != NULL) {
-    etharp_request(netif, &g_net_ctrl.dest_addr);
-    printf("[NET] ARP request sent to %d.%d.%d.%d\r\n", DEST_IP_ADDR0,
-           DEST_IP_ADDR1, DEST_IP_ADDR2, DEST_IP_ADDR3);
+  IP4_ADDR(&s_net.dest_addr, DEST_IP_ADDR0, DEST_IP_ADDR1, DEST_IP_ADDR2,
+           DEST_IP_ADDR3);
+
+  /* P6: check udp_bind return */
+  err_t bind_err = udp_bind(s_net.upcb, IP_ADDR_ANY, UDP_LOCAL_PORT);
+  if (bind_err != ERR_OK) {
+    DBG_ERROR("[Net] udp_bind fail: %d", (int)bind_err);
+    udp_remove(s_net.upcb);
+    s_net.upcb = NULL;
+    s_net.state = NET_ERROR;
+    return -1;
   }
 
-  g_net_ctrl.state = NET_READY;
+  /* Pre-resolve destination MAC via ARP */
+  struct netif *nif = netif_default;
+  if (nif != NULL) {
+    etharp_request(nif, &s_net.dest_addr);
+  }
+
+  s_net.state = NET_READY;
+  DBG_NET("Init OK, port=%d -> %d.%d.%d.%d:%d", UDP_LOCAL_PORT, DEST_IP_ADDR0,
+          DEST_IP_ADDR1, DEST_IP_ADDR2, DEST_IP_ADDR3, UDP_REMOTE_PORT);
   return 0;
 }
 
-/**
- * @brief  诊断函数：严格基于官方库结构体成员进行硬件自检
- */
-void Net_Client_Diagnostic(void) {
-  /* 1. 获取全局状态 */
-  uint32_t current_state = (uint32_t)heth.gState;
-
-  /* 2. 读取运行时的描述符地址 (取列表中的第一个地址) */
-  uint32_t run_tx_base = heth.TxDescList.TxDesc[0];
-  uint32_t run_rx_base = heth.RxDescList.RxDesc[0];
-
-  /* 3. 获取索引状态 */
-  uint32_t tx_idx = heth.TxDescList.CurTxDesc;
-  uint32_t rx_idx = heth.RxDescList.RxDescIdx;
-
-  printf("\r\n[Net_Diag] === Hardware Status ===\r\n");
-  printf("State: 0x%lX (0x40=STARTED)\r\n", current_state);
-  printf("TX_Base: 0x%lX | RX_Base: 0x%lX\r\n", run_tx_base, run_rx_base);
-  printf("TX_Idx: %ld | RX_Idx: %ld\r\n", tx_idx, rx_idx);
-  printf("TX_Frames: %ld | Net_State: %d\r\n", g_net_ctrl.tx_frame_count,
-         (int)g_net_ctrl.state);
-
-  /* 4. [New] 硬件寄存器直接诊断 (解决地址漂移) */
-  volatile uint32_t hw_tx_base = heth.Instance->DMACTDLAR;
-  volatile uint32_t hw_rx_base = heth.Instance->DMACRDLAR;
-
-  printf("HW_TX_Base: 0x%lX | HW_RX_Base: 0x%lX\r\n", hw_tx_base, hw_rx_base);
-
-  /* 5. 关键警告与自动修正 */
-  if (run_tx_base < 0x30000000) {
-    printf("!!! FATAL: Handle Base is pointing to D1 SRAM (0x24...). Check "
-           "Linker/Ethernetif!\r\n");
-  }
-
-  /* 强制重定向逻辑 (Action Plan requirements) */
-  if (hw_tx_base < 0x30000000 && run_tx_base >= 0x30000000) {
-    printf(
-        "!!! WARN: Hardware Drift Detected! Forcing Register Redirect...\r\n");
-    heth.Instance->DMACTDLAR = run_tx_base;
-    heth.Instance->DMACRDLAR = run_rx_base;
-    printf("Redirected -> HW_TX: 0x%lX\r\n", heth.Instance->DMACTDLAR);
-  }
-}
-
 void Net_Client_SendImage(uint8_t *pData, uint32_t len, uint32_t frame_id) {
-  printf("[NET] SendImage: pData=0x%lX, len=%ld\r\n", (uint32_t)pData, len);
-  if (g_net_ctrl.state != NET_READY || pData == NULL || len == 0) {
-    printf("[NET] SKIP: state not ready or invalid params\r\n");
+  if ((s_net.state != NET_READY) || (pData == NULL) || (len == 0U)) {
     return;
   }
 
-  struct pbuf *ptr_pbuf;
-  uint32_t bytes_left = len;
-  uint32_t current_offset = 0;
-  uint32_t chunk_size;
-  const uint32_t max_udp_payload = 1400;
-  uint32_t sent_ok = 0, sent_fail = 0;
-  err_t err;
+  /* P3: ensure DCache coherency before DMA access */
+  SCB_CleanDCache_by_Addr((uint32_t *)((uint32_t)pData & ~31U),
+                          (int32_t)(len + 31U));
 
-  g_net_ctrl.state = NET_SENDING;
-  SCB_CleanDCache_by_Addr((uint32_t *)pData, len);
+  /* P1: compute chunk count */
+  uint32_t payload_cap = NET_MAX_UDP_PAYLOAD - (uint32_t)sizeof(NetChunkHdr_t);
+  uint16_t chunk_cnt = (uint16_t)((len + payload_cap - 1U) / payload_cap);
 
-  while (bytes_left > 0) {
-    chunk_size = (bytes_left > max_udp_payload) ? max_udp_payload : bytes_left;
-    ptr_pbuf = pbuf_alloc(PBUF_TRANSPORT, chunk_size, PBUF_ROM);
-    if (ptr_pbuf != NULL) {
-      ptr_pbuf->payload = (void *)(pData + current_offset);
-      err = udp_sendto(g_net_ctrl.upcb, ptr_pbuf, &g_net_ctrl.dest_addr,
-                       UDP_REMOTE_PORT);
-      if (err == ERR_OK) {
-        bytes_left -= chunk_size;
-        current_offset += chunk_size;
-        sent_ok++;
-      } else {
-        sent_fail++;
-      }
-      pbuf_free(ptr_pbuf);
+  uint32_t offset = 0U;
+  uint32_t fail_streak = 0U;
+  s_net.state = NET_SENDING;
 
-      /* 每发送 10 个包后让出 CPU，防止总线饥饿导致 DCMI 卡死 */
-      if (sent_ok % 10 == 0) {
-        osDelay(1);
-      }
-    } else {
-      sent_fail++;
+  for (uint16_t ci = 0U; ci < chunk_cnt; ci++) {
+    uint32_t chunk_len = len - offset;
+    if (chunk_len > payload_cap) {
+      chunk_len = payload_cap;
+    }
+
+    /* Allocate header pbuf (RAM) */
+    struct pbuf *hdr_p =
+        pbuf_alloc(PBUF_TRANSPORT, (uint16_t)sizeof(NetChunkHdr_t), PBUF_RAM);
+    if (hdr_p == NULL) {
+      fail_streak++;
       break;
     }
+
+    /* P1: fill IVCIS chunk header */
+    NetChunkHdr_t *hdr = (NetChunkHdr_t *)hdr_p->payload;
+    hdr->magic = IVCIS_MAGIC;
+    hdr->frame_id = frame_id;
+    hdr->chunk_idx = ci;
+    hdr->chunk_cnt = chunk_cnt;
+    hdr->total_size = len;
+    hdr->flags = 0U;
+    hdr->reserved[0] = 0U;
+    hdr->reserved[1] = 0U;
+    hdr->reserved[2] = 0U;
+
+    /* Data pbuf (ROM — zero-copy) */
+    struct pbuf *dat_p = pbuf_alloc(PBUF_RAW, (uint16_t)chunk_len, PBUF_ROM);
+    if (dat_p == NULL) {
+      pbuf_free(hdr_p);
+      fail_streak++;
+      break;
+    }
+    dat_p->payload = (void *)(pData + offset);
+
+    pbuf_chain(hdr_p, dat_p);
+
+    err_t err =
+        udp_sendto(s_net.upcb, hdr_p, &s_net.dest_addr, UDP_REMOTE_PORT);
+    pbuf_free(hdr_p);
+
+    if (err == ERR_OK) {
+      offset += chunk_len;
+      fail_streak = 0U;
+    } else {
+      fail_streak++;
+    }
+
+    /* P2: drop frame after 3 consecutive failures */
+    if (fail_streak >= 3U) {
+      DBG_WARN("[Net] Frame #%lu dropped (3 fails)", frame_id);
+      break;
+    }
+
+    /* Yield every 10 chunks to avoid bus starvation */
+    if (((ci + 1U) % 10U) == 0U) {
+      osDelay(1);
+    }
   }
-  printf("[NET] Frame %ld: %ld OK, %ld FAIL\r\n", frame_id, sent_ok, sent_fail);
-  g_net_ctrl.tx_frame_count++;
-  g_net_ctrl.state = NET_READY;
+
+  s_net.tx_frame_count++;
+  s_net.state = NET_READY;
+  DBG_NET("F#%lu: %lu/%luB sent (%lu chunks)", frame_id, offset, len,
+          (uint32_t)chunk_cnt);
 }
+
+void Net_Client_Diagnostic(void) {
+  /* P5: read-only reporting, no register writes */
+  DBG_NET("=== HW Diag ===");
+  DBG_NET("ETH state:0x%lX  TX_desc[0]:0x%lX  RX_desc[0]:0x%lX",
+          (uint32_t)heth.gState, heth.TxDescList.TxDesc[0],
+          heth.RxDescList.RxDesc[0]);
+  DBG_NET("Frames sent: %lu", s_net.tx_frame_count);
+
+  if (heth.TxDescList.TxDesc[0] < 0x30000000U) {
+    DBG_ERROR("[Net] TX desc NOT in D2 SRAM!");
+  }
+}
+
+NetState_t Net_Client_GetState(void) { return s_net.state; }
+uint32_t Net_Client_GetTxCount(void) { return s_net.tx_frame_count; }

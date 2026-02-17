@@ -1,0 +1,2 @@
+../APP/src/vision_capture.c:16:6:Vision_ForceStop	4	static
+../APP/src/vision_capture.c:26:9:Vision_CaptureOne	24	static

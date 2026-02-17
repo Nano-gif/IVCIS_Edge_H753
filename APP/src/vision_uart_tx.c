@@ -1,14 +1,11 @@
 /**
  * @file    vision_uart_tx.c
- * @brief   Send JPEG frame over UART for ATK-XCAM viewer
- * @note    Uses register-level UART TX (same as reference example)
+ * @brief   JPEG 帧 UART 发送 (XCAM 查看器)
+ * @note    寄存器级 TX, 无 HAL 开销
  */
 
 #include "Vision_Pipeline.h"
-#include "debug_config.h"
 #include "stm32h7xx_hal.h"
-
-extern UART_HandleTypeDef huart3;
 
 void Vision_SendFrameUART(void) {
   uint8_t *buf = Vision_GetFrameBuffer();
@@ -18,10 +15,11 @@ void Vision_SendFrameUART(void) {
     return;
   }
 
-  /* Send raw JPEG via register (reliable, no HAL overhead) */
+  /* 逐字节发送原始 JPEG 数据 (XCAM 依赖 SOI/EOI 标记) */
   for (uint32_t i = 0; i < len; i++) {
     USART3->TDR = buf[i];
-    while ((USART3->ISR & USART_ISR_TXE_TXFNF) == 0)
-      ;
+    while ((USART3->ISR & USART_ISR_TXE_TXFNF) == 0) {
+      /* 等待发送就绪 */
+    }
   }
 }

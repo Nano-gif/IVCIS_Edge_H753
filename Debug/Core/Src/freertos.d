@@ -48,10 +48,11 @@ Core/Src/freertos.o: ../Core/Src/freertos.c \
  ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_tim_ex.h \
  ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_uart.h \
  ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_uart_ex.h \
- E:/STM32/OV/APP/Inc/Motion_Detect.h \
- E:/STM32/OV/APP/Inc/Vision_Pipeline.h E:/STM32/OV/APP/Inc/shared_types.h \
+ E:/STM32/OV/APP/Inc/Motion_Detect.h E:/STM32/OV/APP/Inc/Power_Manager.h \
+ E:/STM32/OV/APP/Inc/shared_types.h E:/STM32/OV/APP/Inc/Vision_Pipeline.h \
  E:/STM32/OV/APP/Inc/app_config.h E:/STM32/OV/APP/Inc/debug_config.h \
- E:/STM32/OV/APP/Inc/shared_types.h
+ E:/STM32/OV/Drivers/BSP/ov5640/ov5640.h \
+ E:/STM32/OV/APP/Inc/shared_types.h E:/STM32/OV/APP/Test/test_net_diag.h
 ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h:
 ../Core/Inc/FreeRTOSConfig.h:
 ../Middlewares/Third_Party/FreeRTOS/Source/include/projdefs.h:
@@ -103,8 +104,11 @@ Core/Src/freertos.o: ../Core/Src/freertos.c \
 ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_uart.h:
 ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_uart_ex.h:
 E:/STM32/OV/APP/Inc/Motion_Detect.h:
-E:/STM32/OV/APP/Inc/Vision_Pipeline.h:
+E:/STM32/OV/APP/Inc/Power_Manager.h:
 E:/STM32/OV/APP/Inc/shared_types.h:
+E:/STM32/OV/APP/Inc/Vision_Pipeline.h:
 E:/STM32/OV/APP/Inc/app_config.h:
 E:/STM32/OV/APP/Inc/debug_config.h:
+E:/STM32/OV/Drivers/BSP/ov5640/ov5640.h:
 E:/STM32/OV/APP/Inc/shared_types.h:
+E:/STM32/OV/APP/Test/test_net_diag.h:

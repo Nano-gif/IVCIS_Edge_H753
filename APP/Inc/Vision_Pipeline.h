@@ -4,29 +4,27 @@
 #include "shared_types.h"
 #include <stdint.h>
 
-/**
- * (VisionMode_t defined in shared_types.h)
- */
+/* VisionMode_t 定义在 shared_types.h */
 
-/** Initialize OV5640 camera + DCMI, default JPEG mode. */
+/** 初始化 OV5640 + DCMI, 默认 Gray 模式预热 */
 int8_t Vision_Init(void);
 
-/** Switch between JPEG and Gray modes. */
+/** 切换 JPEG / Gray 模式 (含 DCMI JPEGMode 动态切换) */
 void Vision_SetMode(VisionMode_t mode);
 
-/** Start a single-frame DCMI+DMA capture (synchronous). */
+/** 执行单帧 DCMI+DMA 采集 (同步等待) */
 void Vision_CaptureStart(void);
 
-/** Check if a complete frame has been received. */
+/** 检查是否有完整帧就绪 */
 uint8_t Vision_IsFrameReady(void);
 
-/** Get pointer to the completed frame buffer (NULL if not ready). */
+/** 获取帧缓冲区指针 (无帧时返回 NULL) */
 uint8_t *Vision_GetFrameBuffer(void);
 
-/** Get the actual byte count of the completed frame (0 if not ready). */
+/** 获取帧实际字节数 (无帧时返回 0) */
 uint32_t Vision_GetFrameSize(void);
 
-/** Send current JPEG frame over UART for XCAM viewer. */
+/** 通过 UART 发送当前 JPEG 帧 (XCAM 查看器) */
 void Vision_SendFrameUART(void);
 
 #endif /* VISION_PIPELINE_H */

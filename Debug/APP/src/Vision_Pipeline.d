@@ -51,7 +51,8 @@ APP/src/Vision_Pipeline.o: ../APP/src/Vision_Pipeline.c \
  ../Middlewares/Third_Party/FreeRTOS/Source/include/list.h \
  ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h \
  E:/STM32/OV/APP/Inc/debug_config.h \
- E:/STM32/OV/Drivers/BSP/ov5640/ov5640.h
+ E:/STM32/OV/Drivers/BSP/ov5640/ov5640.h \
+ E:/STM32/OV/APP/Inc/vision_capture.h
 E:/STM32/OV/APP/Inc/Vision_Pipeline.h:
 E:/STM32/OV/APP/Inc/shared_types.h:
 E:/STM32/OV/APP/Inc/app_config.h:
@@ -106,3 +107,4 @@ E:/STM32/OV/APP/Inc/app_config.h:
 ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h:
 E:/STM32/OV/APP/Inc/debug_config.h:
 E:/STM32/OV/Drivers/BSP/ov5640/ov5640.h:
+E:/STM32/OV/APP/Inc/vision_capture.h:

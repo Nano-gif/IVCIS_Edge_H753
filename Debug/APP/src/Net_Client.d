@@ -77,6 +77,7 @@ APP/src/Net_Client.o: ../APP/src/Net_Client.c \
  ../Middlewares/Third_Party/FreeRTOS/Source/include/task.h \
  ../Middlewares/Third_Party/FreeRTOS/Source/include/list.h \
  ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h \
+ E:/STM32/OV/APP/Inc/debug_config.h \
  ../Middlewares/Third_Party/LwIP/src/include/lwip/etharp.h \
  ../Middlewares/Third_Party/LwIP/src/include/lwip/prot/ethernet.h \
  ../Middlewares/Third_Party/LwIP/src/include/lwip/prot/ieee.h \
@@ -161,6 +162,7 @@ E:/STM32/OV/APP/Inc/app_config.h:
 ../Middlewares/Third_Party/FreeRTOS/Source/include/task.h:
 ../Middlewares/Third_Party/FreeRTOS/Source/include/list.h:
 ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h:
+E:/STM32/OV/APP/Inc/debug_config.h:
 ../Middlewares/Third_Party/LwIP/src/include/lwip/etharp.h:
 ../Middlewares/Third_Party/LwIP/src/include/lwip/prot/ethernet.h:
 ../Middlewares/Third_Party/LwIP/src/include/lwip/prot/ieee.h:

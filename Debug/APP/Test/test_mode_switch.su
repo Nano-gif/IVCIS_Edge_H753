@@ -1,0 +1,4 @@
+../APP/Test/test_mode_switch.c:23:13:chk	16	static
+../APP/Test/test_mode_switch.c:33:13:test_jpeg_capture	32	static
+../APP/Test/test_mode_switch.c:53:13:test_gray_capture	24	static
+../APP/Test/test_mode_switch.c:63:6:Test_Mode_Switch_Run	16	static

@@ -6,7 +6,7 @@
 
 ---
 
-- [x] Task 1 - OV5640 初始化 (Vision_Pipeline.c)
+- [ ] Task 1 - OV5640 初始化 (Vision_Pipeline.c)
 
   **目标**：验证 OV5640 能被正确初始化。
 
@@ -23,7 +23,7 @@
 
 ---
 
-- [x] Task 2 - OV5640 JPEG 模式 + 灰度模式切换 (Vision_Pipeline.c)
+- [ ] Task 2 - OV5640 JPEG 模式 + 灰度模式切换 (Vision_Pipeline.c)
 
   **目标**：实现 JPEG/灰度双模式切换，验证两种输出均正确。
 
@@ -141,7 +141,7 @@
 
 ---
 
-- [x] Task 8 - 帧差法运动检测 (Motion_Detect.c)
+- [ ] Task 8 - 帧差法运动检测 (Motion_Detect.c)
 
   **目标**：纯整数帧差法，用于低功耗模式下的运动判断。
 

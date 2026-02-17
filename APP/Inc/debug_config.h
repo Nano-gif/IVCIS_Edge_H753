@@ -14,6 +14,13 @@ extern void dbg_printf(const char *fmt, ...);
 #define DEBUG_ENABLE 1
 
 /* ========================================== */
+/* Test select: 0=production, 1=mode_switch,  */
+/*   2=motion_detect, 3=power_manager,        */
+/*   4=net_diag                               */
+/* ========================================== */
+#define TEST_SELECT 4
+
+/* ========================================== */
 /* Module-level switches                      */
 /* ========================================== */
 #define DEBUG_NET 1

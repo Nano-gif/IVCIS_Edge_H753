@@ -37,11 +37,12 @@
 
 | 模块名称 | 职责 | 对外接口 |
 |----------|------|----------|
-| **Vision_Pipeline** | OV5640 初始化、JPEG/灰度模式切换、DMA 采集 | `Vision_Init()`, `Vision_GetJpegFrame()`, `Vision_SetMode()` |
+| **Vision_Pipeline** | OV5640 JPEG/灰度模式管理、帧解析 | `Vision_Init()`, `Vision_SetMode()`, `Vision_CaptureStart()` |
+| **vision_capture** | DCMI+DMA 底层采集、force_stop | `Vision_ForceStop()`, `Vision_CaptureOne()` |
 | **Motion_Detect** | 帧差法运动检测（纯数学，无AI） | `Motion_Init()`, `Motion_Detect()` |
-| **Net_Client** | LwIP UDP 初始化、JPEG 上报、接收云端结果和运维指令 | `Net_Init()`, `Net_SendImage()`, `Net_RecvResult()` |
+| **Net_Client** | LwIP UDP 初始化、JPEG 上报、接收云端结果 | `Net_Init()`, `Net_SendImage()`, `Net_RecvResult()` |
 | **Alarm_Handler** | GPIO 驱动、声光报警控制 | `Alarm_Trigger()`, `Alarm_Stop()` |
-| **Power_Manager** | 三级功耗模式管理、帧差驱动唤醒 | `Power_SetMode()`, `Power_GetMode()` |
+| **Power_Manager** | 三级功耗状态机 (FULL/LIGHT/DETECT) | `PowerMgr_Init()`, `PowerMgr_Tick()`, `PowerMgr_GetMode()` |
 | **Auto_Exposure** | 图像亮度分析 + 模糊度评估、SCCB 寄存器调整 | `AutoExp_Analyze()`, `AutoExp_Adjust()` |
 | **Servo_Control** | 舵机 PWM 驱动、远程调角 | `Servo_Init()`, `Servo_SetAngle()` |
 | **Debug_Logger** | 分级日志输出 | `DBG_INFO()`, `DBG_WARN()`, `DBG_ERROR()` |
@@ -87,14 +88,21 @@ Power_Manager                       ┌─────────────�
               (声光报警)            (远程调角)
 ```
 
-### 3.3 帧差法数据源方案
+### 3.3 双层运动检测方案
 
-> **方案 C (已确认)**：帧差唤醒模式下，OV5640 通过 SCCB 切换为 **160x120 灰度输出**。检测到运动后，切回 **JPEG 模式**。切换延迟 ~100ms，对"有无车辆"的检测粒度完全可接受。
+> **方案 D (已实施)**：采用折中方案，全程检测运动。FULL/LIGHT 模式用 **JPEG 文件尺寸差**（零额外开销），DETECT 模式用 **灰度帧差法**（高精度）。
 
-| 模式 | OV5640 输出 | 帧率 | 用途 |
-|------|------------|------|------|
-| 全速/轻活跃 | JPEG | 10/2 fps | 图像采集 + 上传 |
-| 帧差唤醒 | 灰度 160x120 | 1 fps | 帧差法运动检测 |
+| 模式 | OV5640 输出 | 帧率 | 检测方法 | 上传 |
+|------|------------|------|----------|------|
+| FULL (全速) | JPEG 640×480 | ~10fps | JPEG 尺寸差 >15% | ✅ UART/UDP |
+| LIGHT (轻活跃) | JPEG 640×480 | ~2fps | JPEG 尺寸差 >15% | ✅ UART/UDP |
+| DETECT (帧差唤醒) | Gray 160×120 | ~1fps | 像素帧差法 | ❌ |
+
+状态转移规则：
+- FULL → LIGHT: 30 秒无运动
+- LIGHT → DETECT: 5 分钟无运动
+- DETECT → FULL: 灰度帧差触发
+- LIGHT 有运动 → FULL
 
 ### 3.4 图像质量闭环控制
 
@@ -128,12 +136,11 @@ Power_Manager                       ┌─────────────�
 
 | 任务名 | 优先级 | 栈大小 | 职责 | 备注 |
 |--------|--------|--------|------|------|
-| **Task_Camera** | 40 (高) | 2048 | 视觉初始化、帧差运动检测、模式切换 (JPEG/Gray) | 核心业务流 |
+| **Task_Camera** | 40 (高) | 2048 | PowerMgr 状态机驱动 + 采集 + 检测 | 核心编排者 |
 | **Task_Net** | 24 (低) | 2048 | LwIP 协议栈处理、UDP 数据收发 | 协议驱动 |
-| **Task_AI** | 32 (中) | 4096 | (已挂起) 云端 AI 模式下边缘端无需此任务 | 保留作为扩展桩 |
 
 > [!NOTE]
-> 为减少任务切换开销，已将**帧差法运动检测**逻辑直接合并至 `Task_Camera`。
+> `Task_Camera` 作为编排者调用 `PowerMgr_Tick()` 驱动状态机，根据模式分发 JPEG 尺寸差检测或灰度帧差检测。
 
 ## 6. 接口定义 (Header Files)
 
@@ -179,15 +186,15 @@ uint32_t Motion_GetDiff(void);
 ### 6.5 Power_Manager.h
 ```c
 typedef enum {
-    POWER_MODE_FULL,        // JPEG @ 10fps + 上传云端
-    POWER_MODE_LIGHT,       // JPEG @ 2fps + 上传云端
-    POWER_MODE_MOTION_ONLY  // 灰度 160x120 @ 1fps + 帧差法
+    PWR_FULL = 0, // JPEG 10fps, 上传+尺寸差检测
+    PWR_LIGHT,    // JPEG 2fps, 上传+尺寸差检测
+    PWR_DETECT    // Gray 1fps, 帧差检测, 不上传
 } PowerMode_t;
 
-void Power_Init(void);
-void Power_SetMode(PowerMode_t mode);
-PowerMode_t Power_GetMode(void);
-void Power_UpdateIdleTime(bool has_motion);
+void        PowerMgr_Init(void);
+PowerMode_t PowerMgr_Tick(uint32_t jpeg_size, bool gray_motion);
+uint32_t    PowerMgr_GetDelay(void);
+PowerMode_t PowerMgr_GetMode(void);
 ```
 
 ### 6.6 Auto_Exposure.h
@@ -267,18 +274,19 @@ typedef struct {
 | 信号 | MCU Pin | Morpho 位置 |
 |------|---------|-------------|
 | DCMI_HSYNC | PA4 | CN11-32 |
-| DCMI_VSYNC | PB7 | CN11-21 |
+| DCMI_VSYNC | PG9 | CN12-16 |
 | DCMI_PIXCLK | PA6 | CN12-13 |
 | DCMI_D0 | PC6 | CN12-4 |
 | DCMI_D1 | PC7 | CN12-19 |
-| DCMI_D2 | PC8 | CN12-2 |
-| DCMI_D3 | PC9 | CN12-1 |
+| DCMI_D2 | PE0 | CN11-34 |
+| DCMI_D3 | PE1 | CN11-36 |
 | DCMI_D4 | PE4 | CN11-48 |
-| DCMI_D5 | PD3 | CN11-40 |
+| DCMI_D5 | PB6 | CN12-17 |
 | DCMI_D6 | PE5 | CN11-50 |
 | DCMI_D7 | PE6 | CN11-62 |
 
-> **注意**：DCMI_D3 选用 PC9 而非 PG11（被 ETH 占用）或 PE1（被 LD2 占用）。
+
+> **注意**：引脚映射以 CubeMX (.ioc) 中的配置为准。
 
 ### 8.3 I2C (SCCB - OV5640 配置)
 
@@ -316,9 +324,10 @@ typedef struct {
 
 ---
 
-**文档版本**: v2.2  
-**更新日期**: 2026-02-14  
+**文档版本**: v2.3  
+**更新日期**: 2026-02-16  
 **维护者**: IVCIS Team  
 **变更记录**:  
+- v2.3: 实施三级功耗状态机 (Power_Manager)；双层检测 (JPEG 尺寸差 + 灰度帧差)；Vision_Pipeline 拆分为 Pipeline + Capture 双模块；更新 Task_Camera 为编排者模式；删除 Task_AI 桩。
 - v2.2: 实施非阻塞 RTOS 任务集成；合并 AI/运动检测逻辑至 Camera 任务；更新接口列表。
 - v2.1: 同步 Vision_Pipeline 灰度模式实现 (`VISION_MODE_GRAY`), 新增 `Vision_CaptureStart` API

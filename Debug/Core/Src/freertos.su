@@ -1,4 +1,3 @@
-../Core/Src/freertos.c:84:6:MX_FREERTOS_Init	8	static
-../Core/Src/freertos.c:130:6:StartCameraTask	32	static
-../Core/Src/freertos.c:174:6:StartAITask	16	static
-../Core/Src/freertos.c:187:6:StartNetTask	16	static
+../Core/Src/freertos.c:87:6:MX_FREERTOS_Init	8	static
+../Core/Src/freertos.c:130:6:StartCameraTask	16	static
+../Core/Src/freertos.c:204:6:StartNetTask	16	static

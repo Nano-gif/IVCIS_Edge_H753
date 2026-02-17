@@ -9,7 +9,6 @@ RM := rm -rf
 
 # All of the sources participating in the build are defined here
 -include sources.mk
--include X-CUBE-AI/App/subdir.mk
 -include Middlewares/Third_Party/LwIP/system/OS/subdir.mk
 -include Middlewares/Third_Party/LwIP/src/netif/ppp/subdir.mk
 -include Middlewares/Third_Party/LwIP/src/netif/subdir.mk
@@ -83,7 +82,7 @@ main-build: IVCIS_Edge_H753.elf secondary-outputs
 
 # Tool invocations
 IVCIS_Edge_H753.elf IVCIS_Edge_H753.map: $(OBJS) $(USER_OBJS) E:\STM32\OV\STM32H753ZITX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "IVCIS_Edge_H753.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m7 -T"E:\STM32\OV\STM32H753ZITX_FLASH.ld" --specs=nosys.specs -Wl,-Map="IVCIS_Edge_H753.map" -Wl,--gc-sections -static -L../Middlewares/ST/AI/Lib --specs=nano.specs -mfpu=fpv5-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+	arm-none-eabi-gcc -o "IVCIS_Edge_H753.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m7 -T"E:\STM32\OV\STM32H753ZITX_FLASH.ld" --specs=nosys.specs -Wl,-Map="IVCIS_Edge_H753.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv5-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

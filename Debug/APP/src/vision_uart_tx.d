@@ -1,6 +1,5 @@
 APP/src/vision_uart_tx.o: ../APP/src/vision_uart_tx.c \
  E:/STM32/OV/APP/Inc/Vision_Pipeline.h E:/STM32/OV/APP/Inc/shared_types.h \
- E:/STM32/OV/APP/Inc/debug_config.h \
  ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal.h \
  ../Core/Inc/stm32h7xx_hal_conf.h \
  ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_rcc.h \
@@ -41,7 +40,6 @@ APP/src/vision_uart_tx.o: ../APP/src/vision_uart_tx.c \
  ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_uart_ex.h
 E:/STM32/OV/APP/Inc/Vision_Pipeline.h:
 E:/STM32/OV/APP/Inc/shared_types.h:
-E:/STM32/OV/APP/Inc/debug_config.h:
 ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal.h:
 ../Core/Inc/stm32h7xx_hal_conf.h:
 ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_rcc.h:
