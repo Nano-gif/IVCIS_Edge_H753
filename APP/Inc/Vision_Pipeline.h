@@ -4,7 +4,7 @@
 #include "shared_types.h"
 #include <stdint.h>
 
-/* VisionMode_t 定义在 shared_types.h */
+/* VisionMode_t, BufState_t 定义在 shared_types.h */
 
 /** 初始化 OV5640 + DCMI, 默认 Gray 模式预热 */
 int8_t Vision_Init(void);
@@ -24,7 +24,16 @@ uint8_t *Vision_GetFrameBuffer(void);
 /** 获取帧实际字节数 (无帧时返回 0) */
 uint32_t Vision_GetFrameSize(void);
 
-/** 通过 UART 发送当前 JPEG 帧 (XCAM 查看器) */
-void Vision_SendFrameUART(void);
+/** 获取当前活跃缓冲区索引 (0=A, 1=B) */
+uint8_t Vision_GetActiveIdx(void);
+
+/** 设置缓冲区状态 */
+void Vision_SetBufState(uint8_t idx, BufState_t state);
+
+/** 获取缓冲区状态 */
+BufState_t Vision_GetBufState(uint8_t idx);
+
+/** 切换到下一个 FREE 缓冲区, 成功返回 1, 背压返回 0 */
+uint8_t Vision_SwitchBuffer(void);
 
 #endif /* VISION_PIPELINE_H */

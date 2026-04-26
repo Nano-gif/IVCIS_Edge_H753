@@ -10,7 +10,8 @@ C_SRCS += \
 ../APP/Test/test_net_client.c \
 ../APP/Test/test_net_diag.c \
 ../APP/Test/test_power_manager.c \
-../APP/Test/test_vision_init.c 
+../APP/Test/test_vision_init.c \
+../APP/Test/test_v2_integration.c
 
 OBJS += \
 ./APP/Test/test_mode_switch.o \
@@ -18,7 +19,8 @@ OBJS += \
 ./APP/Test/test_net_client.o \
 ./APP/Test/test_net_diag.o \
 ./APP/Test/test_power_manager.o \
-./APP/Test/test_vision_init.o 
+./APP/Test/test_vision_init.o \
+./APP/Test/test_v2_integration.o
 
 C_DEPS += \
 ./APP/Test/test_mode_switch.d \
@@ -26,7 +28,8 @@ C_DEPS += \
 ./APP/Test/test_net_client.d \
 ./APP/Test/test_net_diag.d \
 ./APP/Test/test_power_manager.d \
-./APP/Test/test_vision_init.d 
+./APP/Test/test_vision_init.d \
+./APP/Test/test_v2_integration.d
 
 
 # Each subdirectory must supply rules for building sources it contributes

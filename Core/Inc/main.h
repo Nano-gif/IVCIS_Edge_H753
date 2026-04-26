@@ -69,6 +69,8 @@ void Error_Handler(void);
 #define LD3_GPIO_Port GPIOB
 #define LD2_Pin GPIO_PIN_7
 #define LD2_GPIO_Port GPIOB
+#define RS485_DE_Pin GPIO_PIN_4
+#define RS485_DE_GPIO_Port GPIOD
 #define SCCB_SCL_Pin GPIO_PIN_8
 #define SCCB_SCL_GPIO_Port GPIOB
 #define SCCB_SDA_Pin GPIO_PIN_9

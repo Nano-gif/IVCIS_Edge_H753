@@ -1,135 +1,229 @@
 /**
  * @file    Net_Client.c
- * @brief   UDP 核心传输与接收 (零拷贝 + IVCIS 协议)
+ * @brief   UDP Netconn TX/RX client with separated task-owned state.
  */
 
 #include "Net_Client.h"
 #include "app_config.h"
 #include "cmsis_os.h"
 #include "debug_config.h"
-#include "lwip/etharp.h"
-#include "lwip/pbuf.h"
-#include "lwip/udp.h"
+#include "lwip/api.h"
+#include "lwip/netbuf.h"
 #include "stm32h7xx_hal.h"
 #include <string.h>
 
 typedef struct {
-  struct udp_pcb *upcb;
+  struct netconn *conn;
   ip_addr_t dest_addr;
   NetState_t state;
   uint32_t tx_cnt;
-  IVCIS_Command_t last_cmd;
-  volatile bool new_cmd;
-} NetCtrl_t;
+} NetTxCtrl_t;
 
-static NetCtrl_t s_net = {0};
+typedef struct {
+  struct netconn *conn;
+  bool ready;
+} NetRxCtrl_t;
 
-/* --- 私有: UDP 接收回调 --- */
+static NetTxCtrl_t s_net_tx = {0};
+static NetRxCtrl_t s_net_rx = {0};
+static osMutexId_t s_net_lock;
 
-static void
-net_recv_cb(void *arg, struct udp_pcb *pcb, struct pbuf *p,
-            const ip_addr_t *addr,
-            uint16_t port /* Raw 模式仅分配数据 pbuf, 不使用包头链 */) {
-  (void)arg;
-  (void)pcb;
-  (void)addr;
-  (void)port;
-  if (!p)
-    return;
-  /* 至少 8 字节包头 (Magic + Type + Reserved) */
-  if (p->tot_len >= 8U) {
-    IVCIS_Command_t *cmd = (IVCIS_Command_t *)p->payload;
-    if (cmd->magic == IVCR_MAGIC) {
-      uint32_t cpy_len = (p->tot_len > sizeof(IVCIS_Command_t))
-                             ? sizeof(IVCIS_Command_t)
-                             : p->tot_len;
-      memset(&s_net.last_cmd, 0, sizeof(IVCIS_Command_t));
-      memcpy(&s_net.last_cmd, cmd, cpy_len);
-      s_net.new_cmd = true;
-      DBG_NET("Cmd RECV: type=0x%02X len=%u", cmd->cmd_type,
-              (uint32_t)p->tot_len);
-    }
+static bool net_lock(void) {
+  if (s_net_lock == NULL) {
+    s_net_lock = osMutexNew(NULL);
   }
-  pbuf_free(p);
+  if (s_net_lock == NULL) {
+    return true;
+  }
+  return (osMutexAcquire(s_net_lock, osWaitForever) == osOK);
 }
 
-/* --- 公共 API: 生命周期 --- */
+static void net_unlock(void) {
+  if (s_net_lock != NULL) {
+    (void)osMutexRelease(s_net_lock);
+  }
+}
+
+static void net_set_tx_state(NetState_t state) {
+  bool locked = net_lock();
+  s_net_tx.state = state;
+  if (locked) {
+    net_unlock();
+  }
+}
+
+static void net_set_rx_ready(bool ready) {
+  bool locked = net_lock();
+  s_net_rx.ready = ready;
+  if (locked) {
+    net_unlock();
+  }
+}
 
 int8_t Net_Client_Init(void) {
-  if (s_net.upcb)
-    udp_remove(s_net.upcb);
-  s_net.upcb = udp_new();
-  if (!s_net.upcb) {
-    s_net.state = NET_ERROR;
+  if (s_net_tx.conn != NULL) {
+    net_set_tx_state(NET_READY);
+    return 0;
+  }
+
+  s_net_tx.conn = netconn_new(NETCONN_UDP);
+  if (s_net_tx.conn == NULL) {
+    net_set_tx_state(NET_ERROR);
     return -1;
   }
 
-  IP4_ADDR(&s_net.dest_addr, DEST_IP_ADDR0, DEST_IP_ADDR1, DEST_IP_ADDR2,
+  IP4_ADDR(&s_net_tx.dest_addr, DEST_IP_ADDR0, DEST_IP_ADDR1, DEST_IP_ADDR2,
            DEST_IP_ADDR3);
-  if (udp_bind(s_net.upcb, IP_ADDR_ANY, UDP_LOCAL_PORT) != ERR_OK) {
-    udp_remove(s_net.upcb);
-    s_net.upcb = NULL;
-    s_net.state = NET_ERROR;
-    return -1;
-  }
-  udp_recv(s_net.upcb, net_recv_cb, NULL);
-  s_net.state = NET_READY;
+  net_set_tx_state(NET_READY);
+  DBG_NET("TX conn ready");
   return 0;
 }
 
-/* --- 公共 API: 传输 --- */
+int8_t Net_Client_InitRx(void) {
+  if (s_net_rx.conn != NULL) {
+    net_set_rx_ready(true);
+    return 0;
+  }
+
+  s_net_rx.conn = netconn_new(NETCONN_UDP);
+  if (s_net_rx.conn == NULL) {
+    DBG_ERROR("[Net] RX conn alloc fail");
+    return -1;
+  }
+
+  if (netconn_bind(s_net_rx.conn, IP_ADDR_ANY, UDP_LOCAL_PORT) != ERR_OK) {
+    netconn_delete(s_net_rx.conn);
+    s_net_rx.conn = NULL;
+    net_set_rx_ready(false);
+    DBG_ERROR("[Net] RX bind fail");
+    return -1;
+  }
+
+  net_set_rx_ready(true);
+  DBG_NET("RX conn ready, port %u", UDP_LOCAL_PORT);
+  return 0;
+}
 
 void Net_Client_SendImage(uint8_t *pData, uint32_t len, uint32_t frame_id) {
-  if ((s_net.state != NET_READY) || !pData || !len)
+  (void)frame_id;
+  if ((Net_Client_GetTxState() != NET_READY) || (s_net_tx.conn == NULL) ||
+      (pData == NULL) || (len == 0U)) {
     return;
-  /* 仅当 pData 不在非缓存 D2/D3 SRAM 区域时执行 D-Cache 清洗 */
+  }
+
   if ((uint32_t)pData < 0x30000000U) {
     SCB_CleanDCache_by_Addr((uint32_t *)((uint32_t)pData & ~31U),
                             (int32_t)(len + 31U));
   }
 
-  /* Raw 模式: 满载有效载荷 */
   uint32_t cap = NET_MAX_UDP_PAYLOAD;
   uint16_t total = (uint16_t)((len + cap - 1U) / cap);
-  uint32_t off = 0U, streak = 0U;
-  s_net.state = NET_SENDING;
+  uint32_t off = 0U;
+  uint32_t streak = 0U;
+  net_set_tx_state(NET_SENDING);
 
   for (uint16_t i = 0U; i < total; i++) {
     uint32_t clen = ((len - off) > cap) ? cap : (len - off);
-    struct pbuf *d = pbuf_alloc(PBUF_RAW, (uint16_t)clen, PBUF_ROM);
-    if (!d) {
-      streak = 3;
+    struct netbuf *nb = netbuf_new();
+    if (nb == NULL) {
+      streak = 3U;
       break;
     }
 
-    d->payload = (void *)(pData + off);
-    if (udp_sendto(s_net.upcb, d, &s_net.dest_addr, UDP_REMOTE_PORT) ==
-        ERR_OK) {
+    if (netbuf_ref(nb, pData + off, (uint16_t)clen) != ERR_OK) {
+      netbuf_delete(nb);
+      streak++;
+      if (streak >= 3U) {
+        break;
+      }
+      continue;
+    }
+
+    if (netconn_sendto(s_net_tx.conn, nb, &s_net_tx.dest_addr,
+                       UDP_REMOTE_PORT) == ERR_OK) {
       off += clen;
-      streak = 0;
+      streak = 0U;
     } else {
       streak++;
     }
-    pbuf_free(d);
-    if (streak >= 3U)
+
+    netbuf_delete(nb);
+    if (streak >= 3U) {
       break;
+    }
 
     osDelay(1);
   }
-  s_net.tx_cnt++;
-  s_net.state = NET_READY;
+
+  bool locked = net_lock();
+  s_net_tx.tx_cnt++;
+  s_net_tx.state = NET_READY;
+  if (locked) {
+    net_unlock();
+  }
   DBG_NET("Sent %lu bytes (%u chunks)", len, total);
 }
 
-/* --- Public API: Reception --- */
-
 bool Net_Client_RecvCommand(IVCIS_Command_t *cmd) {
-  if (!s_net.new_cmd || !cmd)
+  if ((s_net_rx.conn == NULL) || (cmd == NULL)) {
     return false;
-  memcpy(cmd, &s_net.last_cmd, sizeof(IVCIS_Command_t));
-  s_net.new_cmd = false;
-  return true;
+  }
+
+  struct netbuf *nb = NULL;
+  err_t err = netconn_recv(s_net_rx.conn, &nb);
+  if ((err != ERR_OK) || (nb == NULL)) {
+    return false;
+  }
+
+  void *data = NULL;
+  uint16_t data_len = 0U;
+  netbuf_data(nb, &data, &data_len);
+
+  bool got_cmd = false;
+  if (data_len >= 8U) {
+    IVCIS_Command_t *raw = (IVCIS_Command_t *)data;
+    if (raw->magic == IVCR_MAGIC) {
+      uint16_t cpy = (data_len > sizeof(IVCIS_Command_t))
+                         ? (uint16_t)sizeof(IVCIS_Command_t)
+                         : data_len;
+      memset(cmd, 0, sizeof(IVCIS_Command_t));
+      memcpy(cmd, raw, cpy);
+      got_cmd = true;
+      DBG_NET("Cmd RECV: type=0x%02X len=%u", raw->cmd_type, data_len);
+    }
+  }
+
+  netbuf_delete(nb);
+  return got_cmd;
 }
 
-NetState_t Net_Client_GetState(void) { return s_net.state; }
-uint32_t Net_Client_GetTxCount(void) { return s_net.tx_cnt; }
+NetState_t Net_Client_GetTxState(void) {
+  bool locked = net_lock();
+  NetState_t state = s_net_tx.state;
+  if (locked) {
+    net_unlock();
+  }
+  return state;
+}
+
+NetState_t Net_Client_GetState(void) {
+  return Net_Client_GetTxState();
+}
+
+bool Net_Client_IsRxReady(void) {
+  bool locked = net_lock();
+  bool ready = s_net_rx.ready;
+  if (locked) {
+    net_unlock();
+  }
+  return ready;
+}
+
+uint32_t Net_Client_GetTxCount(void) {
+  bool locked = net_lock();
+  uint32_t tx_cnt = s_net_tx.tx_cnt;
+  if (locked) {
+    net_unlock();
+  }
+  return tx_cnt;
+}

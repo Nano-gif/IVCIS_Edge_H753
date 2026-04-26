@@ -5,37 +5,70 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
+../APP/src/Alarm_Handler.c \
+../APP/src/Auto_Exposure.c \
+../APP/src/Control_Manager.c \
+../APP/src/Modbus_RTU.c \
+../APP/src/Modbus_RegMap.c \
 ../APP/src/Motion_Detect.c \
 ../APP/src/Net_Client.c \
 ../APP/src/Net_Client_Util.c \
 ../APP/src/Power_Manager.c \
+../APP/src/RS485_Driver.c \
+../APP/src/RS485_Manager.c \
+../APP/src/Radar_Manager.c \
+../APP/src/Servo_Control.c \
+../APP/src/Transport_ETH.c \
+../APP/src/Transport_HAL.c \
 ../APP/src/Vision_Pipeline.c \
 ../APP/src/nanoprintf_impl.c \
 ../APP/src/test_motion_detect.c \
 ../APP/src/vision_capture.c \
-../APP/src/vision_uart_tx.c 
+../APP/src/vision_uart_tx.c
 
 OBJS += \
+./APP/src/Alarm_Handler.o \
+./APP/src/Auto_Exposure.o \
+./APP/src/Control_Manager.o \
+./APP/src/Modbus_RTU.o \
+./APP/src/Modbus_RegMap.o \
 ./APP/src/Motion_Detect.o \
 ./APP/src/Net_Client.o \
 ./APP/src/Net_Client_Util.o \
 ./APP/src/Power_Manager.o \
+./APP/src/RS485_Driver.o \
+./APP/src/RS485_Manager.o \
+./APP/src/Radar_Manager.o \
+./APP/src/Servo_Control.o \
+./APP/src/Transport_ETH.o \
+./APP/src/Transport_HAL.o \
 ./APP/src/Vision_Pipeline.o \
 ./APP/src/nanoprintf_impl.o \
 ./APP/src/test_motion_detect.o \
 ./APP/src/vision_capture.o \
-./APP/src/vision_uart_tx.o 
+./APP/src/vision_uart_tx.o
 
 C_DEPS += \
+./APP/src/Alarm_Handler.d \
+./APP/src/Auto_Exposure.d \
+./APP/src/Control_Manager.d \
+./APP/src/Modbus_RTU.d \
+./APP/src/Modbus_RegMap.d \
 ./APP/src/Motion_Detect.d \
 ./APP/src/Net_Client.d \
 ./APP/src/Net_Client_Util.d \
 ./APP/src/Power_Manager.d \
+./APP/src/RS485_Driver.d \
+./APP/src/RS485_Manager.d \
+./APP/src/Radar_Manager.d \
+./APP/src/Servo_Control.d \
+./APP/src/Transport_ETH.d \
+./APP/src/Transport_HAL.d \
 ./APP/src/Vision_Pipeline.d \
 ./APP/src/nanoprintf_impl.d \
 ./APP/src/test_motion_detect.d \
 ./APP/src/vision_capture.d \
-./APP/src/vision_uart_tx.d 
+./APP/src/vision_uart_tx.d
 
 
 # Each subdirectory must supply rules for building sources it contributes
@@ -45,7 +78,6 @@ APP/src/%.o APP/src/%.su APP/src/%.cyclo: ../APP/src/%.c APP/src/subdir.mk
 clean: clean-APP-2f-src
 
 clean-APP-2f-src:
-	-$(RM) ./APP/src/Motion_Detect.cyclo ./APP/src/Motion_Detect.d ./APP/src/Motion_Detect.o ./APP/src/Motion_Detect.su ./APP/src/Net_Client.cyclo ./APP/src/Net_Client.d ./APP/src/Net_Client.o ./APP/src/Net_Client.su ./APP/src/Net_Client_Util.cyclo ./APP/src/Net_Client_Util.d ./APP/src/Net_Client_Util.o ./APP/src/Net_Client_Util.su ./APP/src/Power_Manager.cyclo ./APP/src/Power_Manager.d ./APP/src/Power_Manager.o ./APP/src/Power_Manager.su ./APP/src/Vision_Pipeline.cyclo ./APP/src/Vision_Pipeline.d ./APP/src/Vision_Pipeline.o ./APP/src/Vision_Pipeline.su ./APP/src/nanoprintf_impl.cyclo ./APP/src/nanoprintf_impl.d ./APP/src/nanoprintf_impl.o ./APP/src/nanoprintf_impl.su ./APP/src/test_motion_detect.cyclo ./APP/src/test_motion_detect.d ./APP/src/test_motion_detect.o ./APP/src/test_motion_detect.su ./APP/src/vision_capture.cyclo ./APP/src/vision_capture.d ./APP/src/vision_capture.o ./APP/src/vision_capture.su ./APP/src/vision_uart_tx.cyclo ./APP/src/vision_uart_tx.d ./APP/src/vision_uart_tx.o ./APP/src/vision_uart_tx.su
+	-$(RM) ./APP/src/Motion_Detect.cyclo ./APP/src/Motion_Detect.d ./APP/src/Motion_Detect.o ./APP/src/Motion_Detect.su ./APP/src/Net_Client.cyclo ./APP/src/Net_Client.d ./APP/src/Net_Client.o ./APP/src/Net_Client.su ./APP/src/Net_Client_Util.cyclo ./APP/src/Net_Client_Util.d ./APP/src/Net_Client_Util.o ./APP/src/Net_Client_Util.su ./APP/src/Power_Manager.cyclo ./APP/src/Power_Manager.d ./APP/src/Power_Manager.o ./APP/src/Power_Manager.su ./APP/src/Radar_Manager.cyclo ./APP/src/Radar_Manager.d ./APP/src/Radar_Manager.o ./APP/src/Radar_Manager.su ./APP/src/Vision_Pipeline.cyclo ./APP/src/Vision_Pipeline.d ./APP/src/Vision_Pipeline.o ./APP/src/Vision_Pipeline.su ./APP/src/nanoprintf_impl.cyclo ./APP/src/nanoprintf_impl.d ./APP/src/nanoprintf_impl.o ./APP/src/nanoprintf_impl.su ./APP/src/test_motion_detect.cyclo ./APP/src/test_motion_detect.d ./APP/src/test_motion_detect.o ./APP/src/test_motion_detect.su ./APP/src/vision_capture.cyclo ./APP/src/vision_capture.d ./APP/src/vision_capture.o ./APP/src/vision_capture.su ./APP/src/vision_uart_tx.cyclo ./APP/src/vision_uart_tx.d ./APP/src/vision_uart_tx.o ./APP/src/vision_uart_tx.su
 
 .PHONY: clean-APP-2f-src
-

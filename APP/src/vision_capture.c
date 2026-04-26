@@ -4,6 +4,7 @@
  */
 
 #include "vision_capture.h"
+#include "Camera_Task.h"
 #include "cmsis_os.h"
 #include "debug_config.h"
 #include "stm32h7xx_hal.h"
@@ -27,16 +28,15 @@ uint8_t Vision_CaptureOne(uint8_t *buf, uint32_t word_len) {
   Vision_ForceStop();
 
   g_ov5640_frame_cplt = 0;
+  (void)osThreadFlagsClear(CAMERA_FRAME_DONE_FLAG);
   HAL_DCMI_Start_DMA(&hdcmi, DCMI_MODE_SNAPSHOT, (uint32_t)buf, word_len);
 
-  uint32_t t0 = HAL_GetTick();
-  while (g_ov5640_frame_cplt == 0) {
-    if ((HAL_GetTick() - t0) > FRAME_TIMEOUT_MS) {
-      DBG_VISION("Capture timeout");
-      Vision_ForceStop();
-      return 0;
-    }
-    osDelay(1);
+  uint32_t flags = osThreadFlagsWait(CAMERA_FRAME_DONE_FLAG, osFlagsWaitAny,
+                                     FRAME_TIMEOUT_MS);
+  if (((flags & osFlagsError) != 0U) && (g_ov5640_frame_cplt == 0)) {
+    DBG_VISION("Capture timeout");
+    Vision_ForceStop();
+    return 0;
   }
 
   HAL_DCMI_Stop(&hdcmi);

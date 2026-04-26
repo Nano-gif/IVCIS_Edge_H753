@@ -19,6 +19,7 @@
  */
 
 #include "ov5640.h"
+#include "Camera_Task.h"
 #include "dcmi.h" // 获取 hdcmi
 #include "main.h"
 #include "ov5640_cfg.h"
@@ -1603,4 +1604,5 @@ void OV5640_Apply_Best_Settings(void) {
  */
 void HAL_DCMI_FrameEventCallback(DCMI_HandleTypeDef *hdcmi) {
   g_ov5640_frame_cplt = 1;
+  Camera_NotifyFrameDoneFromISR();
 }

@@ -17,11 +17,19 @@ typedef enum {
   PWR_DETECT    /* Gray 1fps, 帧差检测, 不上传 */
 } PowerMode_t;
 
-/* 帧描述符: Vision -> Net 模块间传递 */
+/* 帧缓冲区状态 (生产者-消费者三态) */
+typedef enum {
+  BUF_FREE = 0, /* 可被 DMA 写入 */
+  BUF_QUEUED,   /* 已入队, 等待发送 */
+  BUF_SENDING   /* 正在被 Net 任务发送 */
+} BufState_t;
+
+/* 帧描述符: Camera(生产者) -> NetTx(消费者) 队列传递 */
 typedef struct {
   uint32_t frame_id; /* 单调递增计数 */
   uint32_t data_len; /* 实际数据长度 (字节) */
   uint8_t *p_data;   /* 指向 JPEG/Gray 缓冲区 (D2 SRAM) */
+  uint8_t  buf_idx;  /* 缓冲区索引 (0=A, 1=B) */
 } FrameDesc_t;
 
 /* UDP 分片包头 (备用，Raw 模式下不使用) */
@@ -56,5 +64,30 @@ typedef struct __attribute__((packed)) {
     } servo;
   } payload;
 } IVCIS_Command_t;
+
+/* 图像质量描述符 (Architecture §6.6) */
+typedef struct {
+  float brightness;    /* 平均亮度 [0.0 - 255.0] */
+  float sharpness;     /* 清晰度评分 (方差法) */
+  bool is_low_quality; /* 综合质量判定 */
+} ImageQuality_t;
+
+typedef enum {
+  RADAR_DIR_UNKNOWN = 0,
+  RADAR_DIR_APPROACHING = 1,
+  RADAR_DIR_LEAVING = -1
+} RadarDirection_t;
+
+typedef struct {
+  bool valid;
+  uint32_t track_id;
+  uint16_t range_cm;
+  int16_t speed_cms;
+  uint8_t lane_id;
+  uint8_t target_count;
+  uint8_t confidence;
+  int8_t direction;
+  uint32_t tick_ms;
+} RadarSummary_t;
 
 #endif /* SHARED_TYPES_H */

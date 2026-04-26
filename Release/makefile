@@ -9,6 +9,7 @@ RM := rm -rf
 
 # All of the sources participating in the build are defined here
 -include sources.mk
+-include APP/src/subdir.mk
 -include X-CUBE-AI/App/subdir.mk
 -include Utilities/JPEG/subdir.mk
 -include Middlewares/Third_Party/LwIP/system/OS/subdir.mk

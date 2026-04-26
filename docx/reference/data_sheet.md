@@ -296,8 +296,8 @@ The meaning of the codification is explained in Table 2.
 Table 2. Codification explanation
 
 
-<table><tr><td>NUCLEO-XXYYZTN</td><td>Description</td><td>Example: NUCLEO-H743ZI2</td></tr><tr><td>XX</td><td>MCU series in STM32 32-bit Arm Cortex MCUs</td><td>STM32H7 series</td></tr><tr><td>YY</td><td>MCU product line in the series</td><td>STM32H743</td></tr><tr><td>Z</td><td>STM32 package pin count</td><td>144 pins</td></tr><tr><td>T</td><td>STM32H7 flash memory size: 
--G for 1 Mbyte 
+<table><tr><td>NUCLEO-XXYYZTN</td><td>Description</td><td>Example: NUCLEO-H743ZI2</td></tr><tr><td>XX</td><td>MCU series in STM32 32-bit Arm Cortex MCUs</td><td>STM32H7 series</td></tr><tr><td>YY</td><td>MCU product line in the series</td><td>STM32H743</td></tr><tr><td>Z</td><td>STM32 package pin count</td><td>144 pins</td></tr><tr><td>T</td><td>STM32H7 flash memory size:
+-G for 1 Mbyte
 -I for 2 Mbytes</td><td>2 Mbytes</td></tr><tr><td>N</td><td>Board version: void or 2</td><td>STLINK-V3E</td></tr></table>
 
 # 3 Development environment
@@ -1171,25 +1171,25 @@ Table 23. Product history
 Table 23. Product history (continued)
 
 
-<table><tr><td>Order code</td><td>Product identification</td><td>Product details</td><td>Product change description</td><td>Product limitations</td></tr><tr><td rowspan="3">NUCLEO-H753ZI</td><td rowspan="3">NUH753ZI$AT3</td><td>MCU: 
-STM32H753ZIT6 
-revision &#x27;V&#x27;</td><td rowspan="3">Packaging: plastic blister replaced by a carton box</td><td rowspan="3">No limitation</td></tr><tr><td>MCU errata sheet: 
-- STM32H750xB and 
-STM32H753x1 device 
-limitations (ES0396)</td></tr><tr><td>Board: 
-MB1364-H753ZI-E01 
-(main board)</td></tr><tr><td rowspan="6">NUCLEO-H723ZG</td><td rowspan="3">NUH723ZG$AT1</td><td>MCU: 
-- STM32H723ZGT6 
-revision &#x27;Z&#x27;</td><td rowspan="3">Initial revision</td><td rowspan="3">No limitation</td></tr><tr><td>MCU errata sheet: 
-- STM32H72xx/73xx 
-device errata (ES0491)</td></tr><tr><td>Board: 
-- MB1364-H723ZG-E01 
-(main board)</td></tr><tr><td rowspan="3">NUH723ZG$AT2</td><td>MCU: 
-- STM32H723ZGT6 
-revision &#x27;Z&#x27;</td><td rowspan="3">Packaging: plastic blister replaced by a carton box</td><td rowspan="3">No limitation</td></tr><tr><td>MCU errata sheet: 
-- STM32H72xx/73xx 
-device errata (ES0491)</td></tr><tr><td>Board: 
-- MB1364-H723ZG-E01 
+<table><tr><td>Order code</td><td>Product identification</td><td>Product details</td><td>Product change description</td><td>Product limitations</td></tr><tr><td rowspan="3">NUCLEO-H753ZI</td><td rowspan="3">NUH753ZI$AT3</td><td>MCU:
+STM32H753ZIT6
+revision &#x27;V&#x27;</td><td rowspan="3">Packaging: plastic blister replaced by a carton box</td><td rowspan="3">No limitation</td></tr><tr><td>MCU errata sheet:
+- STM32H750xB and
+STM32H753x1 device
+limitations (ES0396)</td></tr><tr><td>Board:
+MB1364-H753ZI-E01
+(main board)</td></tr><tr><td rowspan="6">NUCLEO-H723ZG</td><td rowspan="3">NUH723ZG$AT1</td><td>MCU:
+- STM32H723ZGT6
+revision &#x27;Z&#x27;</td><td rowspan="3">Initial revision</td><td rowspan="3">No limitation</td></tr><tr><td>MCU errata sheet:
+- STM32H72xx/73xx
+device errata (ES0491)</td></tr><tr><td>Board:
+- MB1364-H723ZG-E01
+(main board)</td></tr><tr><td rowspan="3">NUH723ZG$AT2</td><td>MCU:
+- STM32H723ZGT6
+revision &#x27;Z&#x27;</td><td rowspan="3">Packaging: plastic blister replaced by a carton box</td><td rowspan="3">No limitation</td></tr><tr><td>MCU errata sheet:
+- STM32H72xx/73xx
+device errata (ES0491)</td></tr><tr><td>Board:
+- MB1364-H723ZG-E01
 (main board)</td></tr></table>
 
 # 10.3 Board revision history
@@ -1324,27 +1324,27 @@ Contact your dealer or supplier for further information.
 Table 25. Document revision history
 
 
-<table><tr><td>Date</td><td>Revision</td><td>Changes</td></tr><tr><td>14-Mar-2019</td><td>1</td><td>Initial version</td></tr><tr><td>11-Jun-2020</td><td>2</td><td>Added: 
-- NUCLEO-H723ZG board 
-- Section 9 with Board revision history and Known limitations 
-Updated: 
-- Section 6.3 switch to STLINK-V3E 
-- Figure 1 to Figure 5, and Figure 9 to Figure 14</td></tr><tr><td>16-Jun-2023</td><td>3</td><td>Updated: 
-- Table 14 with SB16, SB17, SB81, and SB82 added configurations 
-- Table 20 with pin 15 corrected connection 
-- Nucleo-144 boards (MB1364) information 
-Removed: 
-- Direct firmware update in Embedded STLINK-V3E features 
-- Former Figure 15 and Figure 16 USB connectors 
-Removed the references to Arm® Mbed™.</td></tr><tr><td>12-Oct-2023</td><td>4</td><td>Added NUH723ZG$AT2 product identification to Table 23.</td></tr><tr><td>14-Oct-2025</td><td>5</td><td>Updated: 
-- Section 7.4: Power supply 
-- Section 7.5.1: HSE clock (high-speed external clock) 
-- Section 10.1: Product marking 
-- Table 23: Product history 
-- Section 11: Compliance statements and conformity declarations 
-Added: 
-- Section 3.4: EDA resources 
-- Section 5: Safety recommendations 
+<table><tr><td>Date</td><td>Revision</td><td>Changes</td></tr><tr><td>14-Mar-2019</td><td>1</td><td>Initial version</td></tr><tr><td>11-Jun-2020</td><td>2</td><td>Added:
+- NUCLEO-H723ZG board
+- Section 9 with Board revision history and Known limitations
+Updated:
+- Section 6.3 switch to STLINK-V3E
+- Figure 1 to Figure 5, and Figure 9 to Figure 14</td></tr><tr><td>16-Jun-2023</td><td>3</td><td>Updated:
+- Table 14 with SB16, SB17, SB81, and SB82 added configurations
+- Table 20 with pin 15 corrected connection
+- Nucleo-144 boards (MB1364) information
+Removed:
+- Direct firmware update in Embedded STLINK-V3E features
+- Former Figure 15 and Figure 16 USB connectors
+Removed the references to Arm® Mbed™.</td></tr><tr><td>12-Oct-2023</td><td>4</td><td>Added NUH723ZG$AT2 product identification to Table 23.</td></tr><tr><td>14-Oct-2025</td><td>5</td><td>Updated:
+- Section 7.4: Power supply
+- Section 7.5.1: HSE clock (high-speed external clock)
+- Section 10.1: Product marking
+- Table 23: Product history
+- Section 11: Compliance statements and conformity declarations
+Added:
+- Section 3.4: EDA resources
+- Section 5: Safety recommendations
 - Section 12: Product disposal</td></tr></table>
 
 # IMPORTANT NOTICE - READ CAREFULLY

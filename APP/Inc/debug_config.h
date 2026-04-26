@@ -16,9 +16,12 @@ extern void dbg_printf(const char *fmt, ...);
 /* ========================================== */
 /* Test select: 0=production, 1=mode_switch,  */
 /*   2=motion_detect, 3=power_manager,        */
-/*   4=net_diag                               */
+/*   4=net_diag, 5=net_client,                */
+/*   6=v2_integration                         */
 /* ========================================== */
-#define TEST_SELECT 0
+#ifndef TEST_SELECT
+#define TEST_SELECT 6
+#endif
 
 /* ========================================== */
 /* Module-level switches                      */
