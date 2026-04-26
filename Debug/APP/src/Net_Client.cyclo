@@ -1,6 +1,0 @@
-../APP/src/Net_Client.c:29:13:net_recv_cb	4
-../APP/src/Net_Client.c:56:8:Net_Client_Init	4
-../APP/src/Net_Client.c:80:6:Net_Client_SendImage	11
-../APP/src/Net_Client.c:125:6:Net_Client_RecvCommand	3
-../APP/src/Net_Client.c:133:12:Net_Client_GetState	1
-../APP/src/Net_Client.c:134:10:Net_Client_GetTxCount	1

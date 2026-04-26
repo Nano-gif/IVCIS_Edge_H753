@@ -1,0 +1,31 @@
+# STM32CubeIDE / Make build outputs
+*.o
+*.d
+*.su
+*.cyclo
+*.elf
+*.bin
+*.hex
+*.map
+*.lst
+*.list
+
+# Keep checked-in generated make metadata needed by the current scripts
+!Debug/objects.list
+!Release/objects.list
+
+# Local IDE and tool state
+.metadata/
+.recommenders/
+.claude/
+
+# Logs and temporary files
+*.log
+*.tmp
+*.bak
+*.swp
+~$*
+
+# OS files
+.DS_Store
+Thumbs.db

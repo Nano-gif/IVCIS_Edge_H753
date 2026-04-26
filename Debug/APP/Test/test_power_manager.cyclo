@@ -1,7 +1,0 @@
-../APP/Test/test_power_manager.c:24:13:chk	3
-../APP/Test/test_power_manager.c:34:13:test_init	1
-../APP/Test/test_power_manager.c:41:13:test_jpeg_size_detect	1
-../APP/Test/test_power_manager.c:53:13:test_full_to_light	1
-../APP/Test/test_power_manager.c:64:13:test_light_to_detect	1
-../APP/Test/test_power_manager.c:73:13:test_motion_wakeup	1
-../APP/Test/test_power_manager.c:78:6:Test_Power_Manager_Run	2

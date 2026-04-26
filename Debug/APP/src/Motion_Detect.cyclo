@@ -1,3 +1,0 @@
-../APP/src/Motion_Detect.c:20:6:Motion_Init	1
-../APP/src/Motion_Detect.c:28:6:Motion_Detect	8
-../APP/src/Motion_Detect.c:68:10:Motion_GetDiff	1

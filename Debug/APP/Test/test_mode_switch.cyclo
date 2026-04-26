@@ -1,4 +1,0 @@
-../APP/Test/test_mode_switch.c:23:13:chk	3
-../APP/Test/test_mode_switch.c:33:13:test_jpeg_capture	3
-../APP/Test/test_mode_switch.c:53:13:test_gray_capture	1
-../APP/Test/test_mode_switch.c:63:6:Test_Mode_Switch_Run	4

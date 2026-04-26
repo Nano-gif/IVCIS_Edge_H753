@@ -1,8 +1,0 @@
-../APP/src/Vision_Pipeline.c:23:13:extract_gray	2
-../APP/src/Vision_Pipeline.c:31:16:scan_jpeg	8
-../APP/src/Vision_Pipeline.c:54:8:Vision_Init	3
-../APP/src/Vision_Pipeline.c:69:6:Vision_SetMode	4
-../APP/src/Vision_Pipeline.c:99:6:Vision_CaptureStart	5
-../APP/src/Vision_Pipeline.c:116:9:Vision_IsFrameReady	2
-../APP/src/Vision_Pipeline.c:117:10:Vision_GetFrameBuffer	1
-../APP/src/Vision_Pipeline.c:118:10:Vision_GetFrameSize	1

@@ -1,7 +1,0 @@
-../APP/src/Power_Manager.c:21:13:jpeg_size_changed	3
-../APP/src/Power_Manager.c:33:17:quiet_seconds	1
-../APP/src/Power_Manager.c:37:13:switch_mode	1
-../APP/src/Power_Manager.c:44:6:PowerMgr_Init	1
-../APP/src/Power_Manager.c:51:13:PowerMgr_Tick	10
-../APP/src/Power_Manager.c:78:10:PowerMgr_GetDelay	1
-../APP/src/Power_Manager.c:80:13:PowerMgr_GetMode	1

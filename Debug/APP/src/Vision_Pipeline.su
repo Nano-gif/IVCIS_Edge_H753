@@ -1,8 +1,0 @@
-../APP/src/Vision_Pipeline.c:23:13:extract_gray	16	static
-../APP/src/Vision_Pipeline.c:31:16:scan_jpeg	24	static
-../APP/src/Vision_Pipeline.c:54:8:Vision_Init	8	static
-../APP/src/Vision_Pipeline.c:69:6:Vision_SetMode	24	static
-../APP/src/Vision_Pipeline.c:99:6:Vision_CaptureStart	8	static
-../APP/src/Vision_Pipeline.c:116:9:Vision_IsFrameReady	4	static
-../APP/src/Vision_Pipeline.c:117:10:Vision_GetFrameBuffer	4	static
-../APP/src/Vision_Pipeline.c:118:10:Vision_GetFrameSize	4	static
